@@ -1,0 +1,207 @@
+#cloud-config
+
+hostname: "WORKER_IP"
+coreos:
+  flannel:
+    interface: WORKER_IP 
+  etcd2:
+    discovery: https://discovery.etcd.io/DISCOVERY_ID
+    advertise-client-urls: http://WORKER_IP:2379
+    initial-advertise-peer-urls: http://WORKER_IP:2380
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    listen-peer-urls: http://WORKER_IP:2380
+  fleet:
+    metadata: "role=node"
+  units:
+    - name: etcd2.service
+      command: start
+    - name: fleet.service
+      command: start
+    - name: 00-enp0s3.network
+      runtime: true
+      content: |
+        [Match]
+        Name=enp0s3
+        [Network]
+        DNS=DNSSERVER
+        Address=WORKER_IP
+        Gateway=WORKER_GW
+    - name: docker.service
+      drop-ins:
+        - name: 40-flannel.conf
+          content: |
+            [Unit]
+            Requires=flanneld.service
+            After=flanneld.service
+            [Service]
+            EnvironmentFile=/etc/kubernetes/cni/docker_opts_cni.env
+      command: start
+    - name: flanneld.service
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Unit]
+            Requires=etcd2.service
+            After=etcd2.service
+            [Service]
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.2.0.0/16", "Backend": {"Type": "vxlan"}}'
+            ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
+      command: start
+    - name: kubelet.service
+      content: |
+        [Unit]
+        Requires=docker.service
+        After=docker.service
+        [Service]
+        Environment=KUBELET_IMAGE_TAG=v1.5.4_coreos.0
+        Environment="RKT_RUN_ARGS=--uuid-file-save=/var/run/kubelet-pod.uuid \
+        --volume dns,kind=host,source=/etc/resolv.conf \
+        --mount volume=dns,target=/etc/resolv.conf \
+        --volume var-log,kind=host,source=/var/log \
+        --volume cni-bin,kind=host,source=/opt/cni/bin \
+        --mount volume=cni-bin,target=/opt/cni/bin \
+        --mount volume=var-log,target=/var/log"
+        ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
+        ExecStartPre=/usr/bin/mkdir -p /var/log/containers
+        ExecStartPre=/usr/bin/mkdir -p /opt/cni/bin
+        ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
+        ExecStart=/usr/lib/coreos/kubelet-wrapper \
+        --api-servers=https://MASTER_HOST \
+        --cni-conf-dir=/etc/kubernetes/cni/net.d \
+        --network-plugin=cni \
+        --container-runtime=docker \
+        --register-node=true \
+        --allow-privileged=true \
+        --pod-manifest-path=/etc/kubernetes/manifests \
+        --hostname-override=WORKER_IP \
+        --cluster_dns=CLUSTER_DNS \
+        --cluster_domain=cluster.local \
+        --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
+        --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
+        --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem
+        ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
+        Restart=always
+        RestartSec=10
+        [Install]
+        WantedBy=multi-user.target
+      command: start
+  update:
+    reboot-strategy: "etcd-lock"
+  locksmith:
+    window-start: Thu 04:00
+    window-length: 1h
+users:
+  - name: "proserve"
+    passwd: "$6$SALT$htm2FZy.H5V/CUXu6/Sf8qytP.6yJsmt6c9dAdmOU3F505xrN.6No0FTFqNFXDFd0zhFyRkS2vPS6/eZb20pf/"
+    groups:
+      - "sudo"
+      - "docker"
+write_files:
+  - path: "/etc/resolv.conf"
+    permissions: "0644"
+    owner: "root"
+    content: |
+      nameserver DNSSERVER
+  - path: "/etc/kubernetes/cni/docker_opts_cni.env"
+    permissions: "0644"
+    owner: "root"
+    content: |
+      DOCKER_OPT_BIP=""
+      DOCKER_OPT_IPMASQ=""
+  - path: "/etc/kubernetes/cni/net.d/10-flannel.conf"
+    permissions: "0644"
+    owner: "root"
+    content: |
+      {
+        "name": "podnet",
+        "type": "flannel",
+        "delegate": {
+          "isDefaultGateway": true
+        }
+      }
+  - path: "/etc/flannel/options.env"
+    permissions: "0644"
+    owner: "root"
+    content: |
+      FLANNELD_IFACE=WORKER_IP
+      FLANNELD_ETCD_ENDPOINTS=ETCD_ENDPOINTS_URLS
+  - path: "/etc/kubernetes/manifests/kube-proxy.yaml"
+    permissions: "0644"
+    owner: "root"
+    content: |
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: kube-proxy
+        namespace: kube-system
+      spec:
+        hostNetwork: true
+        containers:
+        - name: kube-proxy
+          image: quay.io/coreos/hyperkube:v1.5.4_coreos.0
+          command:
+          - /hyperkube
+          - proxy
+          - --master=MASTER_HOST
+          - --cluster-cidr=10.2.0.0/16
+          - --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml
+          securityContext:
+            privileged: true
+          volumeMounts:
+          - mountPath: /etc/ssl/certs
+            name: "ssl-certs"
+          - mountPath: /etc/kubernetes/worker-kubeconfig.yaml
+            name: "kubeconfig"
+            readOnly: true
+          - mountPath: /etc/kubernetes/ssl
+            name: "etc-kube-ssl"
+            readOnly: true
+        volumes:
+        - name: "ssl-certs"
+          hostPath:
+            path: "/usr/share/ca-certificates"
+        - name: "kubeconfig"
+          hostPath:
+            path: "/etc/kubernetes/worker-kubeconfig.yaml"
+        - name: "etc-kube-ssl"
+          hostPath:
+            path: "/etc/kubernetes/ssl"
+  - path: "/etc/kubernetes/worker-kubeconfig.yaml"
+    permissions: "0644"
+    owner: "root"
+    content: |
+      apiVersion: v1
+      kind: Config
+      clusters:
+      - name: local
+        cluster:
+          certificate-authority: /etc/kubernetes/ssl/ca.pem
+      users:
+      - name: kubelet
+        user:
+          client-certificate: /etc/kubernetes/ssl/worker.pem
+          client-key: /etc/kubernetes/ssl/worker-key.pem
+      contexts:
+      - context:
+          cluster: local
+          user: kubelet
+        name: kubelet-context
+      current-context: kubelet-context
+  - path: "/etc/kubernetes/ssl/ca.pem"
+    permissions: "0664"
+    encoding: "gzip+base64"
+    owner: "root"
+    content: |
+      CA
+  - path: "/etc/kubernetes/ssl/worker-key.pem"
+    permissions: "0600"
+    encoding: "gzip+base64"
+    owner: "root"
+    content: |
+      WORKERKEY
+  - path: "/etc/kubernetes/ssl/worker.pem"
+    permissions: "0664"
+    encoding: "gzip+base64"
+    owner: "root"
+    content: |
+      WORKER
