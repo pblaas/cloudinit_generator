@@ -22,7 +22,6 @@ fi
 
 rm -vf set/*
 
-
 #create root CA
 cd set
 openssl genrsa -out ca-key.pem 2048
@@ -37,7 +36,7 @@ openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial
 
 #create worker certs
 for i in ${WORKER_HOSTS[@]}; do
-openssl genrsa -out ${i}-worker-key.pem 1024
+openssl genrsa -out ${i}-worker-key.pem 2048
 WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=${i}" -config ../template/worker-openssl.cnf
 WORKER_IP=${i} openssl x509 -req -in ${i}-worker.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out ${i}-worker.pem -days 365 -extensions v3_req -extfile ../template/worker-openssl.cnf
 done
@@ -79,15 +78,14 @@ echo ADMINKEY:$ADMINKEY >> index.txt
 echo ADMIN:$ADMIN >> index.txt
 
 #generate the master.yaml from the controller.yaml template
-#this needs work!
-sed -e s,MASTER_HOST_FQDN,`cat ../config.env|grep -w MASTER_HOST_FQDN|cut -d= -f2`,g \
--e s,MASTER_HOST_IP,`cat ../config.env|grep -w MASTER_HOST_IP|cut -d= -f2`,g \
--e s,MASTER_HOST_GW,`cat ../config.env|grep -w MASTER_HOST_GW|cut -d= -f2`,g \
+sed -e s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g \
+-e s,MASTER_HOST_IP,$MASTER_HOST_IP,g \
+-e s,MASTER_HOST_GW,$MASTER_HOST_GW,g \
 -e s,DISCOVERY_ID,$DISCOVERY_ID,g \
--e s,DNSSERVER,`cat ../config.env|grep -w DNSSERVER|cut -d= -f2`,g \
--e s,CLUSTER_DNS,`cat ../config.env|grep -w CLUSTER_DNS|cut -d= -f2`,g \
--e s@ETCD_ENDPOINTS_URLS@`cat ../config.env|grep -w ETCD_ENDPOINTS_URLS|cut -d= -f2`@g \
--e s,SERVICE_CLUSTER_IP_RANGE,`cat ../config.env|grep -w SERVICE_CLUSTER_IP_RANGE|cut -d= -f2`,g \
+-e s,DNSSERVER,$DNSSERVER,g \
+-e s,CLUSTER_DNS,$CLUSTER_DNS,g \
+-e s@ETCD_ENDPOINTS_URLS@${ETCD_ENDPOINTS_URLS}@g \
+-e s,SERVICE_CLUSTER_IP_RANGE,$SERVICE_CLUSTER_IP_RANGE,g \
 -e s,CA,$CA,g \
 -e s,APISERVERKEY,$APISERVERKEY,g \
 -e s,APISERVER,$APISERVER,g \
