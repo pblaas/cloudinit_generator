@@ -3,7 +3,7 @@
 hostname: "WORKER_IP"
 coreos:
   flannel:
-    interface: WORKER_IP 
+    interface: WORKER_IP
   etcd2:
     discovery: https://discovery.etcd.io/DISCOVERY_ID
     advertise-client-urls: http://WORKER_IP:2379
@@ -53,7 +53,7 @@ coreos:
         Requires=docker.service
         After=docker.service
         [Service]
-        Environment=KUBELET_IMAGE_TAG=v1.5.4_coreos.0
+        Environment=KUBELET_IMAGE_TAG=K8S_VER
         Environment="RKT_RUN_ARGS=--uuid-file-save=/var/run/kubelet-pod.uuid \
         --volume dns,kind=host,source=/etc/resolv.conf \
         --mount volume=dns,target=/etc/resolv.conf \
@@ -88,8 +88,8 @@ coreos:
     window-start: Thu 04:00
     window-length: 1h
 users:
-  - name: "proserve"
-    passwd: "$6$SALT$htm2FZy.H5V/CUXu6/Sf8qytP.6yJsmt6c9dAdmOU3F505xrN.6No0FTFqNFXDFd0zhFyRkS2vPS6/eZb20pf/"
+  - name: "core"
+    passwd: "USER_CORE_PASSWORD"
     groups:
       - "sudo"
       - "docker"
@@ -135,7 +135,7 @@ write_files:
         hostNetwork: true
         containers:
         - name: kube-proxy
-          image: quay.io/coreos/hyperkube:v1.5.4_coreos.0
+          image: quay.io/coreos/hyperkube:K8S_VER
           command:
           - /hyperkube
           - proxy

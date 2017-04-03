@@ -1,5 +1,5 @@
 #!/bin/bash
-# Author: pblaas
+# Author: pblaas (patrick@kite4fun.nl)
 # Inital version 04-2017
 
 # This script is used to generate Kubernetes cloud-image files for CoreoS.
@@ -7,9 +7,6 @@
 
 . config.env
 
-#create new  discovery KEY
-#Thank you for the service CoreOS.
-DISCOVERY_ID=`curl -sB https://discovery.etcd.io/new?size=3|cut -d/ -f4`
 
 echo This will DESTROY all files in the set directory. Continue? [No/YES]
 read ANSWER
@@ -21,6 +18,24 @@ if [ ! -d set ]; then
 fi
 
 rm -vf set/*
+
+#create new  discovery KEY
+#Thank you for the service CoreOS team!
+DISCOVERY_ID=`curl -sB https://discovery.etcd.io/new?size=3|cut -d/ -f4`
+
+function password_hash {
+PYTHON_ARG="$1" python - <<END
+import os
+import crypt
+password = (os.environ['PYTHON_ARG'])
+crypted = crypt.crypt(password)
+#print 'cleartext: '+ password
+#print 'crypted  : '+ crypted
+print crypted
+END
+}
+
+HASHED_USER_CORE_PASSWORD=$(password_hash $USER_CORE_PASSWORD)
 
 #create root CA
 cd set
@@ -86,10 +101,13 @@ sed -e s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g \
 -e s,CLUSTER_DNS,$CLUSTER_DNS,g \
 -e s@ETCD_ENDPOINTS_URLS@${ETCD_ENDPOINTS_URLS}@g \
 -e s,SERVICE_CLUSTER_IP_RANGE,$SERVICE_CLUSTER_IP_RANGE,g \
+-e s,USER_CORE_PASSWORD,$HASHED_USER_CORE_PASSWORD,g \
+-e s,K8S_VER,$K8S_VER,g \
 -e s,CA,$CA,g \
 -e s,APISERVERKEY,$APISERVERKEY,g \
 -e s,APISERVER,$APISERVER,g \
 ../template/controller.yaml > master.yaml
+echo Generated: master.yaml
 
 #genereate the worker yamls from the worker.yaml template
 for i in ${WORKER_HOSTS[@]}; do
@@ -100,15 +118,16 @@ sed -e s,WORKER_IP,$i,g \
 -e s,MASTER_HOST,$MASTER_HOST_IP,g \
 -e s,CLUSTER_DNS,$CLUSTER_DNS,g \
 -e s@ETCD_ENDPOINTS_URLS@${ETCD_ENDPOINTS_URLS}@g \
+-e s,USER_CORE_PASSWORD,$HASHED_USER_CORE_PASSWORD,g \
+-e s,K8S_VER,$K8S_VER,g \
 -e s,CA,$CA,g \
 -e s,WORKERKEY,`cat index.txt|grep WORKERKEY_$i|cut -d: -f2`,g \
 -e s,WORKER,`cat index.txt|grep WORKER_$i|cut -d: -f2`,g \
 ../template/worker.yaml > worker_$i.yaml
-echo worker: $i
+echo Generated $i.yaml
 done
 
 cd -
-else 
+else
 	echo Aborting.
 fi
-
