@@ -22,6 +22,7 @@ rm -vf set/*
 #create new  discovery KEY
 #Thank you for the service CoreOS team!
 DISCOVERY_ID=`curl -sB https://discovery.etcd.io/new?size=3|cut -d/ -f4`
+##DISCOVERY_ID="1234"
 
 function password_hash {
 PYTHON_ARG="$1" python - <<END
@@ -128,8 +129,15 @@ sed -e s,WORKER_IP,$i,g \
 echo Generated: worker_$i.yaml
 done
 echo -----------------------------------
-
 cd -
+
+echo You can run the follwing to interact with your new cluster:
+echo ""
+echo "kubectl config set-cluster default-cluster --server=https://$MASTER_HOST_IP --certificate-authority=./set/ca.pem"
+echo "kubectl config set-credentials default-admin --certificate-authority=./set/ca.pem --client-key=./set/admin-key.pem --client-certificate=./set/admin.pem"
+echo "kubectl config set-context default-system --cluster=default-cluster --user=default-admin"
+echo "kubectl config use-context default-system"
+echo ""
 else
 	echo Aborting.
 fi

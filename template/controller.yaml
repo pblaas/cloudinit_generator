@@ -14,11 +14,11 @@ coreos:
     metadata: "role=node"
   units:
     - name: etcd2.service
-      command: start
+      command: stop
     - name: fleet.service
-      command: start
+      command: stop
     - name: iptables-restore.service
-      command: start
+      command: stop
     - name: 00-enp0s3.network
       runtime: true
       content: |
@@ -68,6 +68,7 @@ coreos:
         --api-servers=http://127.0.0.1:8080 \
         --register-schedulable=false \
         --cni-conf-dir=/etc/kubernetes/cni/net.d \
+        --network-plugin=cni \
         --container-runtime=docker \
         --allow-privileged=true \
         --pod-manifest-path=/etc/kubernetes/manifests \
@@ -92,6 +93,22 @@ users:
       - "sudo"
       - "docker"
 write_files:
+  - path: "/home/core/.bashrc"
+    permissions: "0644"
+    owner: "core"
+    content: |
+      if [[ $- != *i* ]] ; then
+        return
+      fi
+      export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/bin:$PWD
+  - path: "/root/.bashrc"
+    permissions: "0644"
+    owner: "core"
+    content: |
+      if [[ $- != *i* ]] ; then
+        return
+      fi
+      export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/bin:$PWD:/home/core
   - path: "/var/lib/iptables/rules-save"
     permissions: "0644"
     owner: "root"
@@ -108,6 +125,7 @@ write_files:
       -A INPUT -p tcp -m tcp --dport 2379 -j ACCEPT
       -A INPUT -p tcp -m tcp --dport 2380 -j ACCEPT
       -A INPUT -p udp -m udp --dport 8472 -j ACCEPT
+      -A INPUT -p udp -m udp --dport 8285 -j ACCEPT
       -A INPUT -p icmp -m icmp --icmp-type 0 -j ACCEPT
       -A INPUT -p icmp -m icmp --icmp-type 3 -j ACCEPT
       -A INPUT -p icmp -m icmp --icmp-type 11 -j ACCEPT

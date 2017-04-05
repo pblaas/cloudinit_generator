@@ -14,11 +14,11 @@ coreos:
     metadata: "role=node"
   units:
     - name: etcd2.service
-      command: start
+      command: stop
     - name: fleet.service
-      command: start
+      command: stop
     - name: iptables-restore.service
-      command: start
+      command: stop
     - name: 00-enp0s3.network
       runtime: true
       content: |
@@ -46,7 +46,7 @@ coreos:
             Requires=etcd2.service
             After=etcd2.service
             [Service]
-            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.2.0.0/16", "Backend": {"Type": "vxlan"}}'
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.2.0.0/16", "Backend":{"Type":"vxlan"}}'
             ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
       command: start
     - name: kubelet.service
@@ -68,6 +68,7 @@ coreos:
         --api-servers=https://MASTER_HOST \
         --cni-conf-dir=/etc/kubernetes/cni/net.d \
         --container-runtime=docker \
+        --network-plugin=cni \
         --register-node=true \
         --allow-privileged=true \
         --pod-manifest-path=/etc/kubernetes/manifests \
@@ -95,6 +96,22 @@ users:
       - "sudo"
       - "docker"
 write_files:
+  - path: "/home/core/.bashrc"
+    permissions: "0644"
+    owner: "core"
+    content: |
+      if [[ $- != *i* ]] ; then
+        return
+      fi
+      export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/bin:$PWD
+  - path: "/root/.bashrc"
+    permissions: "0644"
+    owner: "core"
+    content: |
+      if [[ $- != *i* ]] ; then
+        return
+      fi
+      export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/bin:$PWD:/home/core
   - path: "/var/lib/iptables/rules-save"
     permissions: "0644"
     owner: "root"
