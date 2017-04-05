@@ -33,8 +33,15 @@ curl http://dockerwebserver/worker_IPADRESWORKER.yaml > node.yaml && sudo coreos
 I would like to extend the this project with:
 <ul>
 <li>DNS</li>
+<code>kubectl create -f addons/dns-addon.yaml </code>
 <li>Dashboard</li>
-<code>kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml </code>
+<code>kubectl create -f addons/kubernetes-dashboard.yaml </code><br>
+<code>kubectl proxy</code><br>
+<code>http://localhost:8001/ui</code>
 <li>Heapster</li>
 <li>Influx</li>
 </ul>
+
+###### Troubleshooting
+Interesting reads:
+https://github.com/kubernetes/dashboard/blob/master/docs/user-guide/troubleshooting.md
