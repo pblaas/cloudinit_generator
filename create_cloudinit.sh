@@ -125,7 +125,7 @@ sed -e s,WORKER_IP,$i,g \
 -e s,WORKERKEY,`cat index.txt|grep WORKERKEY_$i|cut -d: -f2`,g \
 -e s,WORKER,`cat index.txt|grep WORKER_$i|cut -d: -f2`,g \
 ../template/worker.yaml > worker_$i.yaml
-echo Generated $i.yaml
+echo Generated: worker_$i.yaml
 done
 echo -----------------------------------
 
