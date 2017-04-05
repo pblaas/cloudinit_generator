@@ -107,6 +107,7 @@ sed -e s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g \
 -e s,APISERVERKEY,$APISERVERKEY,g \
 -e s,APISERVER,$APISERVER,g \
 ../template/controller.yaml > master.yaml
+echo ----------------------
 echo Generated: master.yaml
 
 #genereate the worker yamls from the worker.yaml template
@@ -126,6 +127,7 @@ sed -e s,WORKER_IP,$i,g \
 ../template/worker.yaml > worker_$i.yaml
 echo Generated $i.yaml
 done
+echo -----------------------------------
 
 cd -
 else

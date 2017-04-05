@@ -17,11 +17,13 @@ coreos:
       command: start
     - name: fleet.service
       command: start
+    - name: iptables-restore.service
+      command: start
     - name: 00-enp0s3.network
       runtime: true
       content: |
         [Match]
-        Name=enp0s3
+        Name=ens32
         [Network]
         DNS=DNSSERVER
         Address=MASTER_HOST_IP
@@ -44,7 +46,7 @@ coreos:
             Requires=etcd2.service
             After=etcd2.service
             [Service]
-            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.2.0.0/16", "Backend": {"Type": "vxlan"}}'
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.2.0.0/16"}'
             ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
       command: start
     - name: kubelet.service
@@ -91,6 +93,25 @@ users:
       - "sudo"
       - "docker"
 write_files:
+  - path: "/var/lib/iptables/rules-save"
+    permissions: "0644"
+    owner: "root"
+    content: |
+      *filter
+      :INPUT DROP [0:0]
+      :FORWARD DROP [0:0]
+      :OUTPUT ACCEPT [0:0]
+      -A INPUT -i lo -j ACCEPT
+      -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 2379 -j ACCEPT
+      -A INPUT -p tcp -m tcp --dport 2380 -j ACCEPT
+      -A INPUT -p icmp -m icmp --icmp-type 0 -j ACCEPT
+      -A INPUT -p icmp -m icmp --icmp-type 3 -j ACCEPT
+      -A INPUT -p icmp -m icmp --icmp-type 11 -j ACCEPT
+      COMMIT
   - path: "/etc/resolv.conf"
     permissions: "0644"
     owner: "root"
@@ -146,6 +167,7 @@ write_files:
           - --bind-address=0.0.0.0
           - --etcd-servers=ETCD_ENDPOINTS_URLS
           - --allow-privileged=true
+          - --storage-backend=etcd2
           - --service-cluster-ip-range=SERVICE_CLUSTER_IP_RANGE
           - --secure-port=443
           - --advertise-address=MASTER_HOST_IP
