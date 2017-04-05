@@ -30,10 +30,11 @@ curl http://dockerwebserver/worker_IPADRESWORKER.yaml > node.yaml && sudo coreos
 
 
 ###### Todo
-I would like to extend the templates with:
+I would like to extend the this project with:
 <ul>
 <li>DNS</li>
 <li>Dashboard</li>
+<code>kubectl create -f https://rawgit.com/kubernetes/dashboard/master/src/deploy/kubernetes-dashboard.yaml </code>
 <li>Heapster</li>
 <li>Influx</li>
 </ul>

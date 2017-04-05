@@ -2,7 +2,7 @@
 # Author: pblaas (patrick@kite4fun.nl)
 # Inital version 04-2017
 
-# This script is used to generate Kubernetes cloud-image files for CoreoS.
+# This script is used to generate Kubernetes cloud-init files for CoreoS.
 # it could use some polish.
 
 . config.env

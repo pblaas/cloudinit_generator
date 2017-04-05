@@ -46,7 +46,7 @@ coreos:
             Requires=etcd2.service
             After=etcd2.service
             [Service]
-            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.2.0.0/16"}'
+          ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.2.0.0/16", "Backend":{"Type":"vxlan"}}'
             ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
       command: start
     - name: kubelet.service
@@ -68,7 +68,6 @@ coreos:
         --api-servers=http://127.0.0.1:8080 \
         --register-schedulable=false \
         --cni-conf-dir=/etc/kubernetes/cni/net.d \
-        --network-plugin=cni \
         --container-runtime=docker \
         --allow-privileged=true \
         --pod-manifest-path=/etc/kubernetes/manifests \
@@ -108,6 +107,7 @@ write_files:
       -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
       -A INPUT -p tcp -m tcp --dport 2379 -j ACCEPT
       -A INPUT -p tcp -m tcp --dport 2380 -j ACCEPT
+      -A INPUT -p udp -m udp --dport 8472 -j ACCEPT
       -A INPUT -p icmp -m icmp --icmp-type 0 -j ACCEPT
       -A INPUT -p icmp -m icmp --icmp-type 3 -j ACCEPT
       -A INPUT -p icmp -m icmp --icmp-type 11 -j ACCEPT
