@@ -46,3 +46,11 @@ I would like to extend the this project with:
 ###### Troubleshooting
 Interesting reads:
 https://github.com/kubernetes/dashboard/blob/master/docs/user-guide/troubleshooting.md
+
+###### Testing
+
+<code>kubectl run nginx --image=nginx --replicas=1 --port=80</code><br>
+<code>kubectl expose deployment nginx --port=80 --type=NodePort</code></br>
+Grab the port from the nginx process<br>
+<code>kubectl get services|grep nginx|awk '{print $4}'|cut -c4-8</code><br>
+Browse to your <code>http://master_host:port</code>
