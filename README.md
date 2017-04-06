@@ -39,9 +39,17 @@ I would like to extend the this project with:
 <code>kubectl proxy</code><br>
 <code>http://localhost:8001/ui</code>
 <li>Heapster && Influx</li>
-<code>https://github.com/kubernetes/heapster/blob/master/docs/influxdb.md</code>
-<li>SSH keys core user</li>
+<code>kubectl create -f addons/grafana-deployment.yaml</code><br>
+<code>kubectl create -f addons/grafana-service.yaml</code><br>
+<code>kubectl create -f addons/heapster-deployment.yaml</code><br>
+<code>kubectl create -f addons/heapster-service.yaml</code><br>
+<code>kubectl create -f addons/influxdb-deployment.yaml</code><br>
+<code>kubectl create -f addons/influxdb-service.yaml</code><br>
+<li>Loadbalancing</li>
 </ul>
+
+To save yourself some time you could also install all the addons at once.
+<code>kubectl create -f addons/</code>
 
 ###### Troubleshooting
 Interesting reads:
