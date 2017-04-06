@@ -1,17 +1,13 @@
 ## Cloudinit generator
-
 This script and templates can be used to simplify deployment of a LOCAL Container Linux Kubernetes cluster. It contains 3 steps.
 
 ### Modify
-
 Change the config.env with the required settings.
 
 ### Generate
-
 Run the create_cloudinit.sh to generate the cloud init yaml files.
 
 ### Deploy
-
 Deploy the cloud init files by serving the init yaml e.g through docker.
 
 <code>docker run -ti --rm -p 80:80 -v $PWD/set:/usr/share/nginx/html pblaas/nginx-alpine</code>
@@ -28,9 +24,7 @@ curl http://dockerwebserver/master.yaml > master.yaml && sudo coreos-install -d 
 curl http://dockerwebserver/worker_IPADRESWORKER.yaml > node.yaml && sudo coreos-install -d /dev/sda -c node.yaml
 </code>
 
-
-###### Todo
-I would like to extend the this project with:
+###### Addons
 <ul>
 <li>DNS</li>
 <code>kubectl create -f addons/dns-addon.yaml </code>
@@ -45,11 +39,16 @@ I would like to extend the this project with:
 <code>kubectl create -f addons/heapster-service.yaml</code><br>
 <code>kubectl create -f addons/influxdb-deployment.yaml</code><br>
 <code>kubectl create -f addons/influxdb-service.yaml</code><br>
+</ul>
+
+To save yourself some time you could also install all the addons at once.<br>
+<code>kubectl create -f addons/</code>
+
+###### Todo
+<ul>
 <li>Loadbalancing</li>
 </ul>
 
-To save yourself some time you could also install all the addons at once.
-<code>kubectl create -f addons/</code>
 
 ###### Troubleshooting
 Interesting reads:
