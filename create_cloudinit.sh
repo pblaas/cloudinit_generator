@@ -22,7 +22,7 @@ rm -vf set/*
 #create new  discovery KEY
 #Thank you for the service CoreOS team!
 DISCOVERY_ID=`curl -sB https://discovery.etcd.io/new?size=3|cut -d/ -f4`
-##DISCOVERY_ID="1234"
+#DISCOVERY_ID="1234"
 
 function password_hash {
 PYTHON_ARG="$1" python - <<END
@@ -93,6 +93,9 @@ echo APISERVER:$APISERVER >> index.txt
 echo ADMINKEY:$ADMINKEY >> index.txt
 echo ADMIN:$ADMIN >> index.txt
 
+#convert ssh public key to base64 gzip.
+UCK1=`echo $USER_CORE_KEY1 | gzip | base64 -w0`
+
 #generate the master.yaml from the controller.yaml template
 sed -e s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g \
 -e s,MASTER_HOST_IP,$MASTER_HOST_IP,g \
@@ -102,6 +105,7 @@ sed -e s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g \
 -e s,CLUSTER_DNS,$CLUSTER_DNS,g \
 -e s@ETCD_ENDPOINTS_URLS@${ETCD_ENDPOINTS_URLS}@g \
 -e s,SERVICE_CLUSTER_IP_RANGE,$SERVICE_CLUSTER_IP_RANGE,g \
+-e s,USER_CORE_SSHKEY1,$UCK1,g \
 -e s,USER_CORE_PASSWORD,$HASHED_USER_CORE_PASSWORD,g \
 -e s,K8S_VER,$K8S_VER,g \
 -e s,CA,$CA,g \
@@ -120,6 +124,7 @@ sed -e s,WORKER_IP,$i,g \
 -e s,MASTER_HOST,$MASTER_HOST_IP,g \
 -e s,CLUSTER_DNS,$CLUSTER_DNS,g \
 -e s@ETCD_ENDPOINTS_URLS@${ETCD_ENDPOINTS_URLS}@g \
+-e s,USER_CORE_SSHKEY1,$UCK1,g \
 -e s,USER_CORE_PASSWORD,$HASHED_USER_CORE_PASSWORD,g \
 -e s,K8S_VER,$K8S_VER,g \
 -e s,CA,$CA,g \
