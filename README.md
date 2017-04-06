@@ -1,6 +1,6 @@
 ## Cloudinit generator
 
-This script and templates can be used to simplify deployment of a Container Linux Kubernetes cluster. It contains of just 3 steps.
+This script and templates can be used to simplify deployment of a LOCAL Container Linux Kubernetes cluster. It contains 3 steps.
 
 ### Modify
 
@@ -8,7 +8,7 @@ Change the config.env with the required settings.
 
 ### Generate
 
-Run the create_coudinit.sh to generate the cloud init yaml files.
+Run the create_cloudinit.sh to generate the cloud init yaml files.
 
 ### Deploy
 
@@ -38,8 +38,9 @@ I would like to extend the this project with:
 <code>kubectl create -f addons/kubernetes-dashboard.yaml </code><br>
 <code>kubectl proxy</code><br>
 <code>http://localhost:8001/ui</code>
-<li>Heapster</li>
-<li>Influx</li>
+<li>Heapster && Influx</li>
+<code>https://github.com/kubernetes/heapster/blob/master/docs/influxdb.md</code>
+<li>SSH keys core user</li>
 </ul>
 
 ###### Troubleshooting
