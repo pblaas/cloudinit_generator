@@ -69,7 +69,7 @@ openssl x509 -req -in admin.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -ou
 
 #gzip base64 encode files to store in the cloud init files.
 CAKEY=$(cat ca-key.pem | gzip | base64 -w0)
-CA=$(cat ca.pem | gzip | base64 -w0)
+CACERT=$(cat ca.pem | gzip | base64 -w0)
 APISERVERKEY=$(cat apiserver-key.pem | gzip | base64 -w0)
 APISERVER=$(cat apiserver.pem | gzip | base64 -w0)
 
@@ -87,7 +87,7 @@ ADMIN=`cat admin.pem | gzip | base64 -w0`
 
 #create indexfile with hashes
 echo CAKEY:$CAKEY >> index.txt
-echo CA:$CAKEY >> index.txt
+echo CACERT:$CACERT >> index.txt
 echo APISERVERKEY:$APISERVERKEY >> index.txt
 echo APISERVER:$APISERVER >> index.txt
 echo ADMINKEY:$ADMINKEY >> index.txt
@@ -97,39 +97,41 @@ echo ADMIN:$ADMIN >> index.txt
 UCK1=`echo $USER_CORE_KEY1 | gzip | base64 -w0`
 
 #generate the master.yaml from the controller.yaml template
-sed -e s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g \
--e s,MASTER_HOST_IP,$MASTER_HOST_IP,g \
--e s,MASTER_HOST_GW,$MASTER_HOST_GW,g \
--e s,DISCOVERY_ID,$DISCOVERY_ID,g \
--e s,DNSSERVER,$DNSSERVER,g \
--e s,CLUSTER_DNS,$CLUSTER_DNS,g \
--e s@ETCD_ENDPOINTS_URLS@${ETCD_ENDPOINTS_URLS}@g \
--e s,SERVICE_CLUSTER_IP_RANGE,$SERVICE_CLUSTER_IP_RANGE,g \
--e s,USER_CORE_SSHKEY1,$UCK1,g \
--e s,USER_CORE_PASSWORD,$HASHED_USER_CORE_PASSWORD,g \
--e s,K8S_VER,$K8S_VER,g \
--e s,CA,$CA,g \
--e s,APISERVERKEY,$APISERVERKEY,g \
--e s,APISERVER,$APISERVER,g \
+sed -e "s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g" \
+-e "s,MASTER_HOST_IP,$MASTER_HOST_IP,g" \
+-e "s,MASTER_HOST_GW,$MASTER_HOST_GW,g" \
+-e "s,DISCOVERY_ID,$DISCOVERY_ID,g" \
+-e "s,DNSSERVER,$DNSSERVER,g" \
+-e "s,CLUSTER_DNS,$CLUSTER_DNS,g" \
+-e "s@ETCD_ENDPOINTS_URLS@${ETCD_ENDPOINTS_URLS}@g" \
+-e "s,SERVICE_CLUSTER_IP_RANGE,$SERVICE_CLUSTER_IP_RANGE,g" \
+-e "s,USER_CORE_SSHKEY1,${USER_CORE_KEY1}," \
+-e "s,USER_CORE_SSHKEY2,${USER_CORE_KEY2}," \
+-e "s,USER_CORE_PASSWORD,$HASHED_USER_CORE_PASSWORD,g" \
+-e "s,K8S_VER,$K8S_VER,g" \
+-e "s,CACERT,$CACERT,g" \
+-e "s,APISERVERKEY,$APISERVERKEY,g" \
+-e "s,APISERVER,$APISERVER,g" \
 ../template/controller.yaml > master.yaml
 echo ----------------------
 echo Generated: master.yaml
 
 #genereate the worker yamls from the worker.yaml template
 for i in ${WORKER_HOSTS[@]}; do
-sed -e s,WORKER_IP,$i,g \
--e s,DISCOVERY_ID,$DISCOVERY_ID,g \
--e s,WORKER_GW,$WORKER_GW,g \
--e s,DNSSERVER,$DNSSERVER,g \
--e s,MASTER_HOST,$MASTER_HOST_IP,g \
--e s,CLUSTER_DNS,$CLUSTER_DNS,g \
--e s@ETCD_ENDPOINTS_URLS@${ETCD_ENDPOINTS_URLS}@g \
--e s,USER_CORE_SSHKEY1,$UCK1,g \
--e s,USER_CORE_PASSWORD,$HASHED_USER_CORE_PASSWORD,g \
--e s,K8S_VER,$K8S_VER,g \
--e s,CA,$CA,g \
--e s,WORKERKEY,`cat index.txt|grep WORKERKEY_$i|cut -d: -f2`,g \
--e s,WORKER,`cat index.txt|grep WORKER_$i|cut -d: -f2`,g \
+sed -e "s,WORKER_IP,$i,g" \
+-e "s,DISCOVERY_ID,$DISCOVERY_ID,g" \
+-e "s,WORKER_GW,$WORKER_GW,g" \
+-e "s,DNSSERVER,$DNSSERVER,g" \
+-e "s,MASTER_HOST,$MASTER_HOST_IP,g" \
+-e "s,CLUSTER_DNS,$CLUSTER_DNS,g" \
+-e "s@ETCD_ENDPOINTS_URLS@${ETCD_ENDPOINTS_URLS}@g" \
+-e "s,USER_CORE_SSHKEY1,${USER_CORE_KEY1}," \
+-e "s,USER_CORE_SSHKEY2,${USER_CORE_KEY2}," \
+-e "s,USER_CORE_PASSWORD,$HASHED_USER_CORE_PASSWORD,g" \
+-e "s,K8S_VER,$K8S_VER,g" \
+-e "s,CACERT,$CACERT,g" \
+-e "s,WORKERKEY,`cat index.txt|grep WORKERKEY_$i|cut -d: -f2`,g" \
+-e "s,WORKER,`cat index.txt|grep WORKER_$i|cut -d: -f2`,g" \
 ../template/worker.yaml > worker_$i.yaml
 echo Generated: worker_$i.yaml
 done

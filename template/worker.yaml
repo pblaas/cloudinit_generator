@@ -95,13 +95,10 @@ users:
     groups:
       - "sudo"
       - "docker"
+    ssh_authorized_keys:
+      - USER_CORE_SSHKEY1
+      - USER_CORE_SSHKEY2
 write_files:
-  - path: "/home/core/.ssh/authorized_keys"
-    permissions: "0644"
-    owner: "core"
-    encoding: "gzip+base64"
-    content: |
-      USER_CORE_SSHKEY1
   - path: "/home/core/.bashrc"
     permissions: "0644"
     owner: "core"
@@ -237,7 +234,7 @@ write_files:
     encoding: "gzip+base64"
     owner: "root"
     content: |
-      CA
+      CACERT
   - path: "/etc/kubernetes/ssl/worker-key.pem"
     permissions: "0600"
     encoding: "gzip+base64"
