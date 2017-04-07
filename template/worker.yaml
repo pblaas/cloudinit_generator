@@ -96,6 +96,12 @@ users:
       - "sudo"
       - "docker"
 write_files:
+  - path: "/home/core/.ssh/authorized_keys"
+    permissions: "0644"
+    owner: "core"
+    encoding: "gzip+base64"
+    content: |
+      USER_CORE_SSHKEY1
   - path: "/home/core/.bashrc"
     permissions: "0644"
     owner: "core"
