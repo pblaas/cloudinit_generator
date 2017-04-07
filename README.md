@@ -25,7 +25,7 @@ curl http://dockerwebserver/master.yaml > master.yaml && sudo coreos-install -d 
 curl http://dockerwebserver/worker_IPADRESWORKER.yaml > node.yaml && sudo coreos-install -d /dev/sda -c node.yaml
 ```
 
-###### Addons
+## Addons
 1. DNS
 ```
 kubectl create -f addons/dns-addon.yaml
@@ -51,18 +51,17 @@ To save yourself some time you could also install all the addons at once.
 kubectl create -f addons/
 ```
 
-###### Todo
+### Todo
 <ul>
 <li>Loadbalancing</li>
 </ul>
 
 
-###### Troubleshooting
+### Troubleshooting
 Interesting reads:
 https://github.com/kubernetes/dashboard/blob/master/docs/user-guide/troubleshooting.md
 
-###### Testing
-
+### Testing
 ```
 kubectl run nginx --image=nginx --replicas=1 --port=80
 kubectl expose deployment nginx --port=80 --type=NodePort
