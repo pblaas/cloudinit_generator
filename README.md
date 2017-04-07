@@ -30,13 +30,13 @@ curl http://dockerwebserver/worker_IPADRESWORKER.yaml > node.yaml && sudo coreos
 ```
 kubectl create -f addons/dns-addon.yaml
 ```
-1. Dashboard
+2. Dashboard
 ```
 kubectl create -f addons/kubernetes-dashboard.yaml
 kubectl proxy</code>
 http://localhost:8001/ui
 ```
-1. Heapster && Influx
+3. Heapster && Influx
   ```
   kubectl create -f addons/grafana-deployment.yaml
   kubectl create -f addons/grafana-service.yaml
