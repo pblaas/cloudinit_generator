@@ -1,0 +1,47 @@
+kind: DaemonSet
+apiVersion: extensions/v1beta1
+metadata:
+  name: traefik-ingress-controller
+  labels:
+    k8s-app: traefik-ingress-lb
+    kubernetes.io/cluster-service: "true"
+spec:
+  selector:
+    matchLabels:
+      k8s-app: traefik-ingress-lb
+  template:
+    metadata:
+      labels:
+        k8s-app: traefik-ingress-lb
+        name: traefik-ingress-lb
+    spec:
+      #
+      hostNetwork: true
+      #
+      nodeSelector:
+        role: edge-router
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: acme
+          hostPath:
+            path: /k8s/traefik/acme/
+        - name: config
+          configMap:
+            name: traefik-conf
+      containers:
+      - image: traefik:v1.2.2
+        name: traefik-ingress-lb
+        imagePullPolicy: Always
+        volumeMounts:
+          - mountPath: "/acme/"
+            name: "acme"
+          - mountPath: "/config"
+            name: "config"
+        args:
+        - -d
+        - --web
+        - --web.address=:8081
+        - --kubernetes
+        - --configFile=/config/traefik.toml
+        #- --logLevel=DEBUG
+
