@@ -51,15 +51,18 @@ To save yourself some time you could also install all the addons at once.
 kubectl create -f addons/
 ```
 
-### Todo
-<ul>
-<li>Loadbalancing</li>
-</ul>
+## Loadbalancing
+Loadbalancing with Traefik is added in the
+[Loadbalacing](https://github.com/pblaas/cloudinit_generator/tree/master/loadbalancing) part of the repo.
 
+## storage
+HyperConverged storage with Heketi-glusterFS is added in the
+[Storage](https://github.com/pblaas/cloudinit_generator/tree/master/storage) part of the repo.
 
 ### Troubleshooting
 Interesting reads:
-https://github.com/kubernetes/dashboard/blob/master/docs/user-guide/troubleshooting.md
+https://github.com/kubernetes/dashboard/blob/master/docs/user-guide/troubleshooting.md<br>
+https://medium.com/@rothgar/exposing-services-using-ingress-with-on-prem-kubernetes-clusters-f413d87b6d34
 
 ### Testing
 ```
