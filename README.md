@@ -33,7 +33,7 @@ kubectl create -f addons/dns-addon.yaml
 2. Dashboard
 ```
 kubectl create -f addons/kubernetes-dashboard.yaml
-kubectl proxy</code>
+kubectl proxy
 http://localhost:8001/ui
 ```
 3. Heapster && Influx
