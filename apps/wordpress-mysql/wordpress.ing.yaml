@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: wordpress-mysql-ingress
+spec:
+ rules:
+   - host: wordpress.k8s.yourdomain.nl
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: wordpress
+             servicePort: 80
