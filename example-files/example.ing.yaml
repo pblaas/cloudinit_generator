@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: example-ingress
+ namespace: production
+spec:
+ rules:
+   - host: example.k8s.yourdomain.ltd
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: example
+             servicePort: 80
