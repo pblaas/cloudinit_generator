@@ -24,6 +24,8 @@ curl http://dockerwebserver/master.yaml > master.yaml && sudo coreos-install -d 
 ```
 curl http://dockerwebserver/worker_IPADRESWORKER.yaml > node.yaml && sudo coreos-install -d /dev/sda -c node.yaml
 ```
+After loading the yamls to the controller and the worker nodes umount the ISO and reboot the servers. You should now have a fully working Kubernetes cluster. Before continuing to the other good stuff test some commands on the cluster with the [testing section](#Testing)
+
 
 ## Addons
 1. DNS
@@ -65,6 +67,16 @@ https://github.com/kubernetes/dashboard/blob/master/docs/user-guide/troubleshoot
 https://medium.com/@rothgar/exposing-services-using-ingress-with-on-prem-kubernetes-clusters-f413d87b6d34
 
 ### Testing
+Check out the cluster state:
+```
+kubectl get cs
+```
+Check out the cluster nodes:
+```
+kubectl get nodes
+```
+
+Running a Nginx webserver on the new cluster:
 ```
 kubectl run nginx --image=nginx --replicas=1 --port=80
 kubectl expose deployment nginx --port=80 --type=NodePort
