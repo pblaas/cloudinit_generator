@@ -36,7 +36,7 @@ kubectl create -f addons/kubernetes-dashboard.yaml
 kubectl proxy
 http://localhost:8001/ui
 ```
-3. Heapster && Influx
+3. Heapster && Influx && Grafana
   ```
   kubectl create -f addons/grafana-deployment.yaml
   kubectl create -f addons/grafana-service.yaml
