@@ -24,7 +24,7 @@ curl http://dockerwebserver/master.yaml > master.yaml && sudo coreos-install -d 
 ```
 curl http://dockerwebserver/worker_IPADRESWORKER.yaml > node.yaml && sudo coreos-install -d /dev/sda -c node.yaml
 ```
-After loading the yamls to the controller and the worker nodes umount the ISO and reboot the servers. You should now have a fully working Kubernetes cluster. Before continuing to the other good stuff test some commands on the cluster with the [testing section](#Testing)
+After loading the yamls to the controller and the worker nodes umount the ISO and reboot the servers. You should now have a fully working Kubernetes cluster. Before continuing to the other good stuff test some commands on the cluster with the [testing section](#testing)
 
 
 ## Addons
