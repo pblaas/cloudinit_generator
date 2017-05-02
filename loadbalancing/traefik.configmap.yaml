@@ -13,6 +13,8 @@ data:
       [entryPoints.https]
       address = ":443"
         [entryPoints.https.tls]
+    [file]
+      watch = true    
     [kubernetes]
     [web]
     address=":8081"
