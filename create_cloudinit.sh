@@ -138,7 +138,7 @@ done
 echo -----------------------------------
 cd -
 
-echo You can run the follwing to interact with your new cluster:
+echo You can run the following to interact with your new cluster:
 echo ""
 echo "kubectl config set-cluster default-cluster --server=https://$MASTER_HOST_IP --certificate-authority=./set/ca.pem"
 echo "kubectl config set-credentials default-admin --certificate-authority=./set/ca.pem --client-key=./set/admin-key.pem --client-certificate=./set/admin.pem"
