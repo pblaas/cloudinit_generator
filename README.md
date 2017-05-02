@@ -66,6 +66,10 @@ Interesting reads:
 https://github.com/kubernetes/dashboard/blob/master/docs/user-guide/troubleshooting.md<br>
 https://medium.com/@rothgar/exposing-services-using-ingress-with-on-prem-kubernetes-clusters-f413d87b6d34
 
+### Vmware
+If you are using CoreOS Container Linux on VMware you might want to use an additional unit file to spin up a VMware tools container.<br>
+check out the following link for more info: https://hub.docker.com/r/godmodelabs/open-vm-tools/
+
 ### Testing
 Check out the cluster state:
 ```
