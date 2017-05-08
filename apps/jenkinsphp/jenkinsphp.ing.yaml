@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: jenkinsphp-ingress
+spec:
+ rules:
+   - host: jenkinsphp.k8s.proserve.nl
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: jenkinsphp
+             servicePort: 80

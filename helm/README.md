@@ -79,3 +79,10 @@ spec:
              serviceName: joomla-joomla
              servicePort: 80
 ```
+
+### Jenkins Example
+```
+kubectl create jenkins
+helm install --namespace jenkins --name jenkins --set Master.ServiceType=NodePort stable/jenkins
+printf $(kubectl get secret --namespace jenkins jenkins-jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode);echo
+```
