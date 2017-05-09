@@ -1,12 +1,15 @@
 #!/bin/bash
 # Author: pblaas (patrick@kite4fun.nl)
-# Inital version 04-2017
+# Initial version 04-2017
 
 # This script is used to generate Kubernetes cloud-init files for CoreoS.
-# it could use some polish.
 
+if [ ! -f config.env ]; then
+	echo config.env not found.
+        echo cp config.env.sample to config.env to get started.	
+	exit 1
+fi
 . config.env
-
 
 echo This will DESTROY all files in the set directory. Continue? [No/YES]
 read ANSWER
