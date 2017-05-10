@@ -86,3 +86,26 @@ kubectl create jenkins
 helm install --namespace jenkins --name jenkins --set Master.ServiceType=NodePort stable/jenkins
 printf $(kubectl get secret --namespace jenkins jenkins-jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode);echo
 ```
+
+### Kube-Ops-view
+```
+helm install --name=kube-ops-view stable/kube-ops-view
+```
+
+#### Kube-ops Ingress
+```
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: kube-ops-ingress
+ namespace: default
+spec:
+ rules:
+   - host: kubeops.k8s.yourdomain.ltd
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: kube-ops-view-kube-ops-view
+             servicePort: 80
+```
