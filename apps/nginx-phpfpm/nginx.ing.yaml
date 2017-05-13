@@ -5,7 +5,7 @@ metadata:
  namespace: app1
 spec:
  rules:
-   - host: nginxphpfpm.k8s.yourdomain.ltd
+   - host: nginxphpfpm.k8s.proserve.nl
      http:
        paths:
          - path: /

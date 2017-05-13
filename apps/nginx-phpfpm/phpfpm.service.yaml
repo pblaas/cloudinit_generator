@@ -5,7 +5,8 @@ metadata:
   namespace: app1
 spec:
   selector:
-    app: app1-phpfpm
+    app: app1
+    tier: interpreter
   ports:
     - protocol: TCP
       port: 9000
