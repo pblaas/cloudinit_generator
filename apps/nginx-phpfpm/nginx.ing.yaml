@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: nginx-ingress
+ namespace: app1
+spec:
+ rules:
+   - host: nginxphpfpm.k8s.yourdomain.ltd
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: nginx
+             servicePort: 80

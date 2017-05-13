@@ -1,0 +1,24 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: app1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - name: nginx
+        image: pblaas/nginx-app1:latest
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+          limits:
+            cpu: "150m"
+            memory: "128Mi"
+        ports:
+        - containerPort: 80

@@ -1,0 +1,24 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: phpfpm
+  namespace: app1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: app1-phpfpm
+    spec:
+      containers:
+      - name: phpfpm
+        image: pblaas/phpfpm-alpine-7.1-app1:latest
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+          limits:
+            cpu: "150m"
+            memory: "128Mi"
+        ports:
+        - containerPort: 9000

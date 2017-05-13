@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: phpfpm-svc
+  namespace: app1
+spec:
+  selector:
+    app: app1-phpfpm
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
