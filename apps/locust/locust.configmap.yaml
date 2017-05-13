@@ -1,0 +1,28 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: locustfile
+  namespace: loadtesting
+data:
+  locustfile.py: |-
+    from locust import HttpLocust, TaskSet
+
+    def index(l):
+        l.client.get('/')
+
+    def contact(l):
+        l.client.get("/contact")
+
+    def about(l):
+        l.client.request(method="GET", url='/about')
+
+    def example(l):
+        l.client.request(method="GET", url='/example')
+
+    class UserBehavior(TaskSet):
+        tasks = {index:2, contact:1, about:1, example:1}
+
+    class WebsiteUser(HttpLocust):
+        task_set = UserBehavior
+        min_wait = 5000
+        max_wait = 9000

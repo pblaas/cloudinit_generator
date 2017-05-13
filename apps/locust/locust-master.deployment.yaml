@@ -56,18 +56,21 @@ spec:
     metadata:
       labels:
         app: locustmaster
-        tier: loadtesting 
+        tier: loadtesting
     spec:
       containers:
-      - image: pblaas/locust-test 
+      - image: pblaas/locust-test
         resources:
           requests:
             cpu: "200m"
             memory: "256Mi"
           limits:
-            cpu: "400m"  
+            cpu: "400m"
             memory: "512Mi"
         name: locustmaster
+        volumeMounts:
+          - name: locustfile-config
+            mountPath: /test
         env:
         - name: LOCUST_MODE
           value: master
@@ -76,3 +79,7 @@ spec:
         ports:
         - containerPort: 8089
           name: locustmaster
+      volumes:
+        - name: locustfile-config
+          configMap:
+            name: locustfile

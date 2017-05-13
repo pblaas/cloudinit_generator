@@ -13,18 +13,21 @@ spec:
     metadata:
       labels:
         app: locustslave
-        tier: loadtesting 
+        tier: loadtesting
     spec:
       containers:
-      - image: pblaas/locust-test 
+      - image: pblaas/locust-test
         resources:
           requests:
             cpu: "200m"
             memory: "256Mi"
           limits:
-            cpu: "400m"  
+            cpu: "400m"
             memory: "512Mi"
         name: locustslave
+        volumeMounts:
+          - name: locustfile-config
+            mountPath: /test
         env:
         - name: LOCUST_MODE
           value: slave
@@ -32,3 +35,7 @@ spec:
           value: locustmaster
         - name: TARGET_URL
           value: http://yourtargetsite.ltd
+      volumes:
+        - name: locustfile-config
+          configMap:
+            name: locustfile
