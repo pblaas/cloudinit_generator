@@ -59,7 +59,7 @@ spec:
         tier: loadtesting
     spec:
       containers:
-      - image: pblaas/locust-test
+      - image: pblaas/locust-alpine:latest
         resources:
           requests:
             cpu: "200m"
@@ -75,7 +75,9 @@ spec:
         - name: LOCUST_MODE
           value: master
         - name: TARGET_URL
-          value: http://yourtargetsite.ltd
+          value: http://yourtargeturl.ltd
+        - name: SCENARIO_FILE
+          value: /test/locustfile.py
         ports:
         - containerPort: 8089
           name: locustmaster

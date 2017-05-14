@@ -16,7 +16,7 @@ spec:
         tier: loadtesting
     spec:
       containers:
-      - image: pblaas/locust-test
+      - image: pblaas/locust-alpine:latest
         resources:
           requests:
             cpu: "200m"
@@ -34,7 +34,9 @@ spec:
         - name: MASTER_HOST
           value: locustmaster
         - name: TARGET_URL
-          value: http://yourtargetsite.ltd
+          value: http://yourtargeturl.ltd
+        - name: SCENARIO_FILE
+          value: /test/locustfile.py
       volumes:
         - name: locustfile-config
           configMap:
