@@ -1,0 +1,25 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: app1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: app1
+        tier: caching
+    spec:
+      containers:
+      - name: resis
+        image: redis:3.0.7-alpine
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "300m"
+            memory: "768Mi"
+        ports:
+        - containerPort: 6379

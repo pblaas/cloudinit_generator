@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis-svc
+  namespace: app1
+spec:
+  selector:
+    app: app1
+    tier: caching
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
