@@ -1,0 +1,16 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: neo4j
+spec:
+  selector:
+    app: neo4j
+  ports:
+    - name: webport
+      protocol: TCP
+      port: 7474 
+      targetPort: 7474
+    - name: boltport 
+      protocol: TCP
+      port: 7687
+      targetPort: 7687

@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: neo4j-ingress
+spec:
+ rules:
+   - host: neo4j.k8s.yourdomain.ltd
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: neo4j
+             servicePort: 7474 
+   - host: neo4j-bolt.k8s.yourdomain.ltd
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: neo4j
+             servicePort: 7687
