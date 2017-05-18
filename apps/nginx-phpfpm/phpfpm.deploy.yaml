@@ -16,10 +16,10 @@ spec:
         image: pblaas/phpfpm-alpine-7.1-app1:latest
         resources:
           requests:
-            cpu: "100m"
-            memory: "64Mi"
+            cpu: "15m"
+            memory: "80Mi"
           limits:
-            cpu: "150m"
-            memory: "128Mi"
+            cpu: "30m"
+            memory: "100Mi"
         ports:
         - containerPort: 9000

@@ -16,10 +16,10 @@ spec:
         image: pblaas/nginx-app1:latest
         resources:
           requests:
-            cpu: "100m"
-            memory: "64Mi"
+            cpu: "30m"
+            memory: "15Mi"
           limits:
-            cpu: "150m"
-            memory: "128Mi"
+            cpu: "40m"
+            memory: "25Mi"
         ports:
         - containerPort: 80
