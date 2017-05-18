@@ -29,7 +29,7 @@ spec:
           configMap:
             name: traefik-conf
       containers:
-      - image: traefik:v1.2.2
+      - image: traefik:v1.3.0-rc2-alpine
         name: traefik-ingress-lb
         imagePullPolicy: Always
         volumeMounts:
@@ -38,10 +38,10 @@ spec:
           - mountPath: "/config"
             name: "config"
         args:
-        - -d
+        #- -d
         - --web
         - --web.address=:8081
         - --kubernetes
         - --configFile=/config/traefik.toml
-        #- --logLevel=DEBUG
+        - --logLevel=PANIC
 
