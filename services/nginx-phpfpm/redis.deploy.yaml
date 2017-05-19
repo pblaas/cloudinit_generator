@@ -16,10 +16,10 @@ spec:
         image: redis:3.0.7-alpine
         resources:
           requests:
-            cpu: "25m"
-            memory: "10Mi"
-          limits:
-            cpu: "50m"
+            cpu: "30m"
             memory: "25Mi"
+          limits:
+            cpu: "80m"
+            memory: "50Mi"
         ports:
         - containerPort: 6379
