@@ -84,6 +84,50 @@ coreos:
         [Install]
         WantedBy=multi-user.target
       command: start
+    - name: increase-nf_conntrack-connections.service
+      command: start
+      content: |
+        [Unit]
+        Description=Increase the number of connections in nf_conntrack.
+        [Service]
+        Type=oneshot
+        ExecStartPre=/usr/sbin/modprobe nf_conntrack
+        ExecStart=/bin/sh -c "sysctl -w net.netfilter.nf_conntrack_max=393216"
+    - name: increase-nf_conntrack-hashsize.service
+      command: start
+      content: |
+        [Unit]
+        Description=Increase the nf_conntrack hashsize.
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/sh -c "echo 98304 > /sys/module/nf_conntrack/parameters/hashsize"
+    - name: increase-port_range.service
+      command: start
+      content: |
+        [Unit]
+        Description=Increase port_range.
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/sh -c "echo 1024 65535 > /proc/sys/net/ipv4/ip_local_port_range"
+    - name: settimezone.service
+      command: start
+      content: |
+        [Unit]
+        Description=Set the time zone
+        [Service]
+        ExecStart=/usr/bin/timedatectl set-timezone Europe/Amsterdam
+        RemainAfterExit=yes
+        Type=oneshot
+    - name: systemd-tinesyncd.service
+      command: stop
+      mask: true
+    - name: ntpd.service
+      command: start
+      enable: true
+    - name: systemd-modules-load.service
+      command: restart
+    - name: systemd-sysctl.service
+      command: restart
   update:
     reboot-strategy: "etcd-lock"
   locksmith:
@@ -186,6 +230,7 @@ write_files:
           - proxy
           - --master=https://MASTER_HOST
           - --cluster-cidr=10.2.0.0/16
+          - --conntrack-max-per-core=0
           - --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml
           securityContext:
             privileged: true
@@ -247,3 +292,19 @@ write_files:
     owner: "root"
     content: |
       WORKER
+  - path: /etc/motd.d/k8s.conf
+    owner: "root"
+    permissions: "0644"
+    encoding: "gzip+base64"
+    content: |
+      H4sIAJ7IHVkAA3WTO7rEIAiF+6zCng/oWQ07oKDK7u9Bx6iTuTTx8R8CAq19mzOLv05h1/eBsEbed2YYvxQ77WKUIKdBoafi+kkSP8tSyEmfPu/b2rGFwhfN5xWRNKU4BLHo6HuxvJPY3aUiw0ejDqzjPGn++DRBTkAyERt+YRAIUy7n13RdvDTQuC261BUszVhk0DL33CRUqjaIxGoR2nz6okFPdfZlasVWz8zRPdrm/Go+c0dkpFaP61EalECJ16+1aO1+FVzVXZitQCwhrG5xg6gzDjo/dCDIHhUViXSrWyqVoEEjr6utIt/qbhFeR+R4RFRJZpJ4+fLdXB8+qjYgqp/wBzz+djVruRygov5YW2yORhld5TbPzQl1gWUmP15Czo6VkUjyUzts7HNo72ngo+c2Da2B2GZny3Zje3a/Jg0z+TLZ799T/K9df0AUN+scBAAA
+  - path: /etc/ntp.conf
+    content: |
+      server 0.europe.pool.ntp.org
+      server 1.europe.pool.ntp.org
+      server 2.europe.pool.ntp.org
+      # - Allow only time queries, at a limited rate.
+      # - Allow all local queries (IPv4, IPv6)
+      restrict default nomodify nopeer noquery limited kod
+      restrict 127.0.0.1
+      restrict [::1]
