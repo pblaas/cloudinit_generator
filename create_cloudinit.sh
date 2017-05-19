@@ -6,7 +6,7 @@
 
 if [ ! -f config.env ]; then
 	echo config.env not found.
-        echo cp config.env.sample to config.env to get started.	
+        echo cp config.env.sample to config.env to get started.
 	exit 1
 fi
 . config.env
@@ -143,10 +143,10 @@ cd -
 
 echo You can run the following to interact with your new cluster:
 echo ""
-echo "kubectl config set-cluster default-cluster --server=https://$MASTER_HOST_IP --certificate-authority=./set/ca.pem"
-echo "kubectl config set-credentials default-admin --certificate-authority=./set/ca.pem --client-key=./set/admin-key.pem --client-certificate=./set/admin.pem"
-echo "kubectl config set-context default-system --cluster=default-cluster --user=default-admin"
-echo "kubectl config use-context default-system"
+echo "kubectl config set-cluster $MASTER_HOST_IP-cluster --server=https://$MASTER_HOST_IP --certificate-authority=./set/ca.pem"
+echo "kubectl config set-credentials $MASTER_HOST_IP-admin --certificate-authority=./set/ca.pem --client-key=./set/admin-key.pem --client-certificate=./set/admin.pem"
+echo "kubectl config set-context $MASTER_HOST_IP-system --cluster=$MASTER_HOST_IP-cluster --user=$MASTER_HOST_IP-admin"
+echo "kubectl config use-context $MASTER_HOST_IP-system"
 echo ""
 else
 	echo Aborting.
