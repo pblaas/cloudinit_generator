@@ -58,6 +58,10 @@ spec:
       - image: pblaas/spark:2.0.2
         command: [ "/usr/bin/supervisord" ]
         args: [ "--configuration=/opt/conf/master.conf" ]
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "512Mi"
         name: sparkmaster
         env:
         - name: SPARK_MASTER_HOST

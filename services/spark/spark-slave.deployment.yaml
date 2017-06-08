@@ -21,7 +21,7 @@ spec:
         args: [ "--configuration=/opt/conf/slave.conf" ]
         resources:
           requests:
-            cpu: "1000m"
+            cpu: "100m"
             memory: "1024Mi"
         name: sparkslave
         env:
