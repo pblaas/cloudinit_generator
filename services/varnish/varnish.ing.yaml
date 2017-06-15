@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: varnish-ingress
+ labels:
+   app: varnish
+ 
+spec:
+ rules:
+   - host: www.yourdomain.ltd
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: varnish
+             servicePort: 80

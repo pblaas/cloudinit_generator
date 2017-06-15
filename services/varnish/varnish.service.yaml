@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: varnish
+  labels:
+    app: varnish
+  
+spec:
+  selector:
+    app: varnish
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
