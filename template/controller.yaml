@@ -89,7 +89,7 @@ coreos:
         [Service]
         Type=oneshot
         ExecStartPre=/usr/sbin/modprobe nf_conntrack
-        ExecStart=/bin/sh -c "sysctl -w net.netfilter.nf_conntrack_max=393216"
+        ExecStart=/bin/sh -c "sysctl -w net.netfilter.nf_conntrack_max=589824"
     - name: increase-nf_conntrack-hashsize.service
       command: start
       content: |
@@ -97,7 +97,7 @@ coreos:
         Description=Increase the nf_conntrack hashsize.
         [Service]
         Type=oneshot
-        ExecStart=/bin/sh -c "echo 98304 > /sys/module/nf_conntrack/parameters/hashsize"
+        ExecStart=/bin/sh -c "echo 147456 > /sys/module/nf_conntrack/parameters/hashsize"
     - name: increase-port_range.service
       command: start
       content: |
@@ -106,6 +106,30 @@ coreos:
         [Service]
         Type=oneshot
         ExecStart=/bin/sh -c "echo 1024 65535 > /proc/sys/net/ipv4/ip_local_port_range"
+    - name: increase-net.core.somaxconn.service
+      command: start
+      content: |
+        [Unit]
+        Description=Increase net.core.somaxconn.
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/sh -c "sysctl -w net.core.somaxconn=256"
+    - name: change-conntrack_timeout.service
+      command: start
+      content: |
+        [Unit]
+        Description=change conntrack tcp timeout.
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/sh -c "sysctl -w net.netfilter.nf_conntrack_tcp_timeout_time_wait=1"
+    - name: change-tcp_timeout_estab.service
+      command: start
+      content: |
+        [Unit]
+        Description=change tcp timeout estab.
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/sh -c "sysctl -w net.netfilter.nf_conntrack_tcp_timeout_established=600"
     - name: settimezone.service
       command: start
       content: |
@@ -115,7 +139,7 @@ coreos:
         ExecStart=/usr/bin/timedatectl set-timezone Europe/Amsterdam
         RemainAfterExit=yes
         Type=oneshot
-    - name: systemd-tinesyncd.service
+    - name: systemd-timesyncd.service
       command: stop
       mask: true
     - name: ntpd.service
