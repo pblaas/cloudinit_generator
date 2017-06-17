@@ -65,6 +65,11 @@ openssl genrsa -out admin-key.pem 2048
 openssl req -new -key admin-key.pem -out admin.csr -subj "/CN=kube-admin"
 openssl x509 -req -in admin.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out admin.pem -days 365
 
+#create demouser certs
+openssl genrsa -out demouser-key.pem 2048
+openssl req -new -key demouser-key.pem -out demouser.csr -subj "/CN=demouser"
+openssl x509 -req -in demouser.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out demouser.pem -days 365
+
 # encode to base64 gzip files.
 # cat ca.pem | gzip | base64 -w0
 # decode from base64 gzip string
@@ -145,8 +150,12 @@ echo You can run the following to interact with your new cluster:
 echo ""
 echo "kubectl config set-cluster $MASTER_HOST_IP-cluster --server=https://$MASTER_HOST_IP --certificate-authority=./set/ca.pem"
 echo "kubectl config set-credentials $MASTER_HOST_IP-admin --certificate-authority=./set/ca.pem --client-key=./set/admin-key.pem --client-certificate=./set/admin.pem"
-echo "kubectl config set-context $MASTER_HOST_IP-system --cluster=$MASTER_HOST_IP-cluster --user=$MASTER_HOST_IP-admin"
-echo "kubectl config use-context $MASTER_HOST_IP-system"
+echo "kubectl config set-credentials $MASTER_HOST_IP-demouser --certificate-authority=./set/ca.pem --client-key=./set/demouser-key.pem --client-certificate=./set/demouser.pem"
+echo "kubectl config set-context $MASTER_HOST_IP-admin --cluster=$MASTER_HOST_IP-cluster --user=$MASTER_HOST_IP-admin"
+echo "kubectl config set-context $MASTER_HOST_IP-demouser --cluster=$MASTER_HOST_IP-cluster --user=$MASTER_HOST_IP-demouser"
+echo "kubectl config use-context $MASTER_HOST_IP-admin"
+echo "#OR"
+echo "kubectl config use-context $MASTER_HOST_IP-demouser"
 echo ""
 else
 	echo Aborting.
