@@ -120,9 +120,9 @@ sed -e "s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g" \
 -e "s,CACERT,$CACERT,g" \
 -e "s,APISERVERKEY,$APISERVERKEY,g" \
 -e "s,APISERVER,$APISERVER,g" \
-../template/controller.yaml > master.yaml
+../template/controller.yaml > node_$MASTER_HOST_IP.yaml
 echo ----------------------
-echo Generated: master.yaml
+echo Generated: Master: node_$MASTER_HOST_IP.yaml
 
 #genereate the worker yamls from the worker.yaml template
 for i in ${WORKER_HOSTS[@]}; do
@@ -140,8 +140,8 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,CACERT,$CACERT,g" \
 -e "s,WORKERKEY,`cat index.txt|grep WORKERKEY_$i|cut -d: -f2`,g" \
 -e "s,WORKER,`cat index.txt|grep WORKER_$i|cut -d: -f2`,g" \
-../template/worker.yaml > worker_$i.yaml
-echo Generated: worker_$i.yaml
+../template/worker.yaml > node_$i.yaml
+echo Generated: Worker: node_$i.yaml
 done
 echo -----------------------------------
 cd -
