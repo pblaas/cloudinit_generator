@@ -59,3 +59,7 @@ Run test persistant volume claim to test if auto-volume-claiming works.
 kubectl create -f test-pvc.yml
 kubectl get pvc
 ```
+Make the storageclass default
+```
+kubectl patch storageclass slow -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+```
