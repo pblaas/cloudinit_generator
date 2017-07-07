@@ -4,7 +4,13 @@ metadata:
   name: phpfpm
   namespace: app1
 spec:
-  replicas: 1
+  replicas: 5 
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 10
+      maxUnavailable: 3 
+  minReadySeconds: 5  
   template:
     metadata:
       labels:
