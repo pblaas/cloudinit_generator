@@ -80,6 +80,31 @@ spec:
              servicePort: 80
 ```
 
+### Wordpress Example
+```
+kubectl create ns wordpress
+helm install --namespace wordpress --name wordpress --set wordpressUsername=admin,wordpressPassword=thisismypw,mariadb.mariadbRootPassword=secretpassword,serviceType=NodePort stable/wordpres
+```
+
+#### Wordpress ingress
+```
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: wordpress
+ namespace: wordpress
+spec:
+ rules:
+   - host: wordpress.k8s.yourdomain.ltd
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: wordpress-wordpress
+             servicePort: 80
+```
+
+
 ### Jenkins Example
 ```
 kubectl create jenkins
