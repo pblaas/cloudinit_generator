@@ -105,7 +105,7 @@ spec:
           name: dns-tcp
           protocol: TCP
       - name: healthz
-        image: gcr.io/google_containers/exechealthz-amd64:1.2.0
+        image: gcr.io/google_containers/exechealthz-amd64:1.2
         resources:
           limits:
             memory: 50Mi
