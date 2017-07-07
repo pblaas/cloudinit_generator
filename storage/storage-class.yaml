@@ -5,5 +5,5 @@ metadata:
   name: slow
 provisioner: kubernetes.io/glusterfs
 parameters:
-  resturl: "http://10.3.0.147:8080"
+  resturl: "http://10.3.0.160:8080"
 
