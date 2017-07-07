@@ -48,7 +48,7 @@ spec:
     spec:
       containers:
       - name: kubedns
-        image: gcr.io/google_containers/kubedns-amd64:1.8
+        image: gcr.io/google_containers/kubedns-amd64:1.9
         resources:
           limits:
             memory: 170Mi
@@ -105,7 +105,7 @@ spec:
           name: dns-tcp
           protocol: TCP
       - name: healthz
-        image: gcr.io/google_containers/exechealthz-amd64:1.2
+        image: gcr.io/google_containers/exechealthz-amd64:1.2.0
         resources:
           limits:
             memory: 50Mi
