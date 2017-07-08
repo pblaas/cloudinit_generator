@@ -46,7 +46,7 @@ cd set
 openssl genrsa -out ca-key.pem 2048
 openssl req -x509 -new -nodes -key ca-key.pem -days 10000 -out ca.pem -subj "/CN=kube-ca"
 
-sed -e s/K8S_SERVICE_IP/$K8S_SERVICE_IP/ -e s/MASTER_HOST/$MASTER_HOST_IP/ ../template/openssl.cnf > openssl.cnf
+sed -e s/K8S_SERVICE_IP/$K8S_SERVICE_IP/ -e s/MASTER_HOST_IP/$MASTER_HOST_IP/ -e s/FLOATING_IP/$FLOATING_IP/ ../template/openssl.cnf > openssl.cnf
 
 #create API certs
 openssl genrsa -out apiserver-key.pem 2048
