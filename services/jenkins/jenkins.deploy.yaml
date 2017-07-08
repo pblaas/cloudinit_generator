@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: jenkins-home-claim
-  namespace: jenkins3
+  namespace: jenkins
   annotations:
     volume.beta.kubernetes.io/storage-class: "slow"
   labels:
@@ -18,7 +18,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: jenkins
-  namespace: jenkins3
+  namespace: jenkins
 spec:
   replicas: 1
   template:

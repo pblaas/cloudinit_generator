@@ -2,10 +2,10 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
  name: jenkins
- namespace: jenkins3
+ namespace: jenkins
 spec:
  rules:
-   - host: jenkins3.k8s.proserve.nl
+   - host: jenkins.k8s.proserve.nl
      http:
        paths:
          - path: /
