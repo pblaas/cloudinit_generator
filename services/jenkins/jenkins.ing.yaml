@@ -5,7 +5,7 @@ metadata:
  namespace: jenkins
 spec:
  rules:
-   - host: jenkins.k8s.proserve.nl
+   - host: jenkins.k8s.yourdomain.ltd
      http:
        paths:
          - path: /
