@@ -28,6 +28,9 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: locustmaster-ingress
+  annotations:
+    ingress.kubernetes.io/auth-type: basic
+    ingress.kubernetes.io/auth-secret: access
   namespace: loadtesting
   labels:
     tool: locust
