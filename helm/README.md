@@ -83,7 +83,7 @@ spec:
 ### Wordpress Example
 ```
 kubectl create ns wordpress
-helm install --namespace wordpress --name wordpress --set wordpressUsername=admin,wordpressPassword=thisismypw,mariadb.mariadbRootPassword=secretpassword,serviceType=NodePort stable/wordpres
+helm install --namespace wordpress --name wordpress --set wordpressUsername=admin,wordpressPassword=thisismypw,mariadb.mariadbRootPassword=secretpassword,serviceType=NodePort stable/wordpress
 ```
 
 #### Wordpress ingress
