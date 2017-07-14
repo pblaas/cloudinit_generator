@@ -64,8 +64,8 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,CACERT,$CACERT,g" \
 -e "s,WORKERKEY,`cat index.txt|grep WORKERKEY_$i|cut -d: -f2`,g" \
 -e "s,WORKER,`cat index.txt|grep WORKER_$i|cut -d: -f2`,g" \
-../template/worker_proxy.yaml > worker_$i.yaml
-echo Generated: worker_$i.yaml
+../template/worker_proxy.yaml > node_$i.yaml
+echo Generated: node_$i.yaml
 done
 echo -----------------------------------
 cd -
