@@ -19,19 +19,8 @@ fi
 
 cd set
 
-function password_hash {
-PYTHON_ARG="$1" python - <<END
-import os
-import crypt
-password = (os.environ['PYTHON_ARG'])
-crypted = crypt.crypt(password)
-#print 'cleartext: '+ password
-#print 'crypted  : '+ crypted
-print crypted
-END
-}
-
-HASHED_USER_CORE_PASSWORD=$(password_hash $USER_CORE_PASSWORD)
+CUSTOMSALT=$(openssl rand -base64 14)
+HASHED_USER_CORE_PASSWORD=$(perl -le "print crypt '$USER_CORE_PASSWORD', '\$6\$$CUSTOMSALT' ")
 
 #create worker certs
 for i in $1; do
