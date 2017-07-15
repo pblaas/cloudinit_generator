@@ -48,7 +48,7 @@ done
 #genereate the worker yamls from the worker.yaml template
 for i in $1; do
 sed -e "s,WORKER_IP,$i,g" \
--e "s,DISCOVERY_ID,$DISCOVERY_ID,g" \
+-e "s,DISCOVERY_ID,`cat index.txt|grep DISCOVERY_ID|cut -d: -f2`,g" \
 -e "s,WORKER_GW,$WORKER_GW,g" \
 -e "s,DNSSERVER,$DNSSERVER,g" \
 -e "s,MASTER_HOST_IP,$MASTER_HOST_IP,g" \

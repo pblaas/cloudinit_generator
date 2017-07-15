@@ -27,11 +27,15 @@ rm -vf set/*
 DISCOVERY_ID=`curl -sB https://discovery.etcd.io/new?size=3|cut -d/ -f4`
 #DISCOVERY_ID="1234"
 
+
 CUSTOMSALT=$(openssl rand -base64 14)
 HASHED_USER_CORE_PASSWORD=$(perl -le "print crypt '$USER_CORE_PASSWORD', '\$6\$$CUSTOMSALT' ")
 
-#create root CA
 cd set
+# Saving discovery ID for future worker use.
+echo DISCOVERY_ID:$DISCOVERY_ID >> index.txt
+
+#create root CA
 openssl genrsa -out ca-key.pem 2048
 openssl req -x509 -new -nodes -key ca-key.pem -days 10000 -out ca.pem -subj "/CN=kube-ca"
 
