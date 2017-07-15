@@ -19,7 +19,7 @@ fi
 
 cd set
 
-CUSTOMSALT=$(openssl rand -base64 14)
+CUSTOMSALT=$(openssl rand -base64 12)
 HASHED_USER_CORE_PASSWORD=$(perl -le "print crypt '$USER_CORE_PASSWORD', '\$6\$$CUSTOMSALT' ")
 
 #create worker certs
@@ -45,21 +45,18 @@ for i in $1; do
 	echo WORKER_$i:$WORKER >> index.txt
 done
 
-#convert ssh public key to base64 gzip.
-UCK1=`echo $USER_CORE_KEY1 | gzip | base64 -w0`
-
 #genereate the worker yamls from the worker.yaml template
 for i in $1; do
 sed -e "s,WORKER_IP,$i,g" \
 -e "s,DISCOVERY_ID,$DISCOVERY_ID,g" \
 -e "s,WORKER_GW,$WORKER_GW,g" \
 -e "s,DNSSERVER,$DNSSERVER,g" \
--e "s,MASTER_HOST,$MASTER_HOST_IP,g" \
+-e "s,MASTER_HOST_IP,$MASTER_HOST_IP,g" \
 -e "s,CLUSTER_DNS,$CLUSTER_DNS,g" \
 -e "s@ETCD_ENDPOINTS_URLS@${ETCD_ENDPOINTS_URLS}@g" \
 -e "s,USER_CORE_SSHKEY1,${USER_CORE_KEY1}," \
 -e "s,USER_CORE_SSHKEY2,${USER_CORE_KEY2}," \
--e "s,USER_CORE_PASSWORD,$HASHED_USER_CORE_PASSWORD,g" \
+-e "s,USER_CORE_PASSWORD,${HASHED_USER_CORE_PASSWORD},g" \
 -e "s,K8S_VER,$K8S_VER,g" \
 -e "s,CACERT,$CACERT,g" \
 -e "s,WORKERKEY,`cat index.txt|grep WORKERKEY_$i|cut -d: -f2`,g" \
