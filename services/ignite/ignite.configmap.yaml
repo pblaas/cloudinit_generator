@@ -1,0 +1,34 @@
+apiVersion: v1
+data:
+  example-kube.xml: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n<!--\n  Licensed
+    to the Apache Software Foundation (ASF) under one or more\n  contributor license
+    agreements.  See the NOTICE file distributed with\n  this work for additional
+    information regarding copyright ownership.\n  The ASF licenses this file to You
+    under the Apache License, Version 2.0\n  (the \"License\"); you may not use this
+    file except in compliance with\n  the License.  You may obtain a copy of the License
+    at\n       http://www.apache.org/licenses/LICENSE-2.0\n  Unless required by applicable
+    law or agreed to in writing, software\n  distributed under the License is distributed
+    on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+    express or implied.\n  See the License for the specific language governing permissions
+    and\n  limitations under the License.\n-->\n\n<!--\n    Ignite configuration with
+    all defaults and enabled p2p deployment and enabled events.\n-->\n<beans xmlns=\"http://www.springframework.org/schema/beans\"\n
+    \      xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n       xmlns:util=\"http://www.springframework.org/schema/util\"\n
+    \      xsi:schemaLocation=\"\n        http://www.springframework.org/schema/beans\n
+    \       http://www.springframework.org/schema/beans/spring-beans.xsd\n        http://www.springframework.org/schema/util\n
+    \       http://www.springframework.org/schema/util/spring-util.xsd\">\n\n\n    <bean
+    id=\"ignite.cfg\" class=\"org.apache.ignite.configuration.IgniteConfiguration\">\n\n
+    \       <!-- Explicitly configure TCP discovery SPI to provide list of initial
+    nodes. -->\n        <property name=\"discoverySpi\">\n            <bean class=\"org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi\">\n
+    \               <property name=\"ipFinder\">\n                    <!--\n                        Ignite
+    provides several options for automatic discovery that can be used\n                        instead
+    os static IP based discovery. For information on all options refer\n                        to
+    our documentation: http://apacheignite.readme.io/docs/cluster-config\n                    -->\n
+    \                   <!-- Uncomment static IP finder to enable static-based discovery
+    of initial nodes. -->\n                    <!--<bean class=\"org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder\">-->\n
+    \                   <bean class=\"org.apache.ignite.spi.discovery.tcp.ipfinder.kubernetes.TcpDiscoveryKubernetesIpFinder\">\n\t\t\t
+    \   <property name=\"namespace\" value=\"ignite\"/>\n                    </bean>\n
+    \               </property>\n            </bean>\n        </property>\n    </bean>\n</beans>\n"
+kind: ConfigMap
+metadata:
+  name: kube-ignite-config
+  namespace: ignite

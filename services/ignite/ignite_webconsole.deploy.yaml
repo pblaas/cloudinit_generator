@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ignite-web-claim
+  namespace: ignite
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "slow"
+  labels:
+    app: ignite-web 
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: ignite-webconsole
+  namespace: ignite
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ignite-web
+    spec:
+      containers:
+      - name:  web-console
+        image: apacheignite/web-console-standalone 
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+          limits:
+            cpu: "400m"
+            memory: "1024Mi"
+        ports:
+        - containerPort: 80
+        - containerPort: 3000
+        volumeMounts:
+        - name: ignite-web-persistent-storage
+          mountPath: /var/lib/mongodb
+      volumes:
+      - name: ignite-web-persistent-storage
+        persistentVolumeClaim:
+          claimName: ignite-web-claim
+

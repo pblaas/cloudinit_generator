@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: ignite-rest
+ namespace: ignite
+spec:
+ rules:
+   - host: ignite-rest.k8s.domain.ltd
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: ignite
+             servicePort: 8080
+

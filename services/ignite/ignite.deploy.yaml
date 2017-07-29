@@ -1,0 +1,52 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  # Custom Ignite cluster's name.
+  name: ignite-cluster
+  namespace: ignite
+spec:
+  # A number of Ignite pods to be started by Kubernetes initially.
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        # This label has to be added to the selector's section of 
+        # ignite-service.yaml so that the Kubernetes Ignite lookup service
+        # can easily track all Ignite pods available deployed so far.
+        app: ignite
+    spec:
+      volumes:
+        # Custom name for the storage that holds Ignite's configuration
+        # which is example-kube.xml.
+        - name: ignite-storage
+          configMap:
+           # Must be equal to the PersistentVolumeClaim created before.
+            name: kube-ignite-config 
+      containers:
+        # Custom Ignite pod name.
+      - name: ignite-node
+        # Ignite Docker image. Kubernetes IP finder is supported starting from
+        # Apache Ignite 1.9.0
+        image: apacheignite/ignite:2.0.0
+        env:
+        # Ignite's Docker image parameter. Adding the jar file that
+        # contain TcpDiscoveryKubernetesIpFinder implementation.
+        - name: OPTION_LIBS
+          value: ignite-kubernetes,ignite-rest-http
+        # Ignite's Docker image parameter. Passing the Ignite configuration
+        # to use for an Ignite pod.
+        - name: CONFIG_URI
+          value: file:////data/ignite/example-kube.xml
+        ports:
+        # Ports to open.
+        # Might be optional depending on your Kubernetes environment.
+        - containerPort: 11211 # REST port number.
+        - containerPort: 47100 # communication SPI port number.
+        - containerPort: 47500 # discovery SPI port number.
+        - containerPort: 49112 # JMX port number.
+        - containerPort: 8080  # HTTP REST  port number.
+        volumeMounts:
+        # Mounting the storage with the Ignite configuration.
+        - mountPath: "/data/ignite"
+          name: ignite-storage 
+          

@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: ignite-webconsole
+ namespace: ignite
+spec:
+ rules:
+   - host: ignite.k8s.domain.ltd
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: ignite-web
+             servicePort: 80
+   - host: ignite-console.k8s.domain.ltd
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: ignite-web
+             servicePort: 3000
+
