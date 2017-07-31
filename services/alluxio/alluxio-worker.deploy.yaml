@@ -1,0 +1,34 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: alluxio-worker
+  namespace: alluxio
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: alluxio-worker
+    spec:
+      containers:
+      - name: alluxio-worker
+        image: pblaas/alluxio:latest
+        args:
+        - worker
+        env:
+        - name: ALLUXIO_MASTER_HOSTNAME 
+          value: alluxio-master-svc 
+        - name: ALLUXIO_WORKER_MEMORY_SIZE
+          value: 2048M
+        - name: ALLUXIO_RAM_FOLDER
+          value: /opt/shareddisk
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "2048Mi"
+          limits:
+            cpu: "400m"
+            memory: "2250Mi"
+        ports:
+        - containerPort: 19999
+        - containerPort: 19998
