@@ -77,7 +77,9 @@ coreos:
         --cluster_domain=cluster.local \
         --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
         --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
-        --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem
+        --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem \
+        --client-ca-file=/etc/kubernetes/ssl/ca.pem \
+        --anonymous-auth=false
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
         RestartSec=10
