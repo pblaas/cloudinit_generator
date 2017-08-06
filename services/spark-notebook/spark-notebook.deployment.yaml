@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spark-notebook-svc
+  namespace: dataprocessing
+  labels:
+    app: spark-notebook
+    tool: spark
+spec:
+  ports:
+    - name: ui
+      port: 9001
+      protocol: TCP
+      targetPort: 9001
+  selector:
+    app: spark-notebook
+    tier: dataprocessing
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: spark-notebook-ingress
+  namespace: dataprocessing
+  labels:
+    tool: spark
+spec:
+  rules:
+    - host: spark-notebook.k8s.yourdomain.ltd
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: spark-notebook-svc
+              servicePort: 9001
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: spark-notebook
+  namespace: dataprocessing
+  labels:
+    app: spark-notebook
+    tool: spark
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: spark-notebook
+        tier: dataprocessing 
+    spec:
+      containers:
+      - image:  andypetrella/spark-notebook:0.7.0-scala-2.11.8-spark-2.1.1-hadoop-2.6.0-cdh5.4.2-with-hive 
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+        name: spark-notebook
+        env:
+        - name: SPARKMASTER
+          value: sparkmaster
+        ports:
+        - containerPort: 9001
+          name: spark-notebook
+
