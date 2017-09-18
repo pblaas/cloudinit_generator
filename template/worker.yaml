@@ -336,7 +336,7 @@ write_files:
     content: |
       ETCDCACERT
   - path: "/etc/kubernetes/ssl/etcd-worker-key.pem"
-    permissions: "0600"
+    permissions: "0644"
     encoding: "gzip+base64"
     owner: "root"
     content: |
