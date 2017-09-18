@@ -39,6 +39,11 @@ echo DISCOVERY_ID:$DISCOVERY_ID >> index.txt
 openssl genrsa -out ca-key.pem 2048
 openssl req -x509 -new -nodes -key ca-key.pem -days 10000 -out ca.pem -subj "/CN=kube-ca"
 
+#create etcd CA
+openssl genrsa -out etcd-ca-key.pem 2048
+openssl req -x509 -new -nodes -key etcd-ca-key.pem -days 10000 -out etcd-ca.pem -subj "/CN=etcd-ca"
+
+
 sed -e s/K8S_SERVICE_IP/$K8S_SERVICE_IP/ -e s/MASTER_HOST_IP/$MASTER_HOST_IP/ -e s/FLOATING_IP/$FLOATING_IP/ ../template/openssl.cnf > openssl.cnf
 
 #create API certs
@@ -46,12 +51,25 @@ openssl genrsa -out apiserver-key.pem 2048
 openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=kube-apiserver" -config openssl.cnf
 openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out apiserver.pem -days 365 -extensions v3_req -extfile openssl.cnf
 
+#create ETCD-API-certs
+openssl genrsa -out etcd-apiserver-key.pem 2048
+openssl req -new -key etcd-apiserver-key.pem -out etcd-apiserver.csr -subj "/CN=etcd-kube-apiserver" -config openssl.cnf
+openssl x509 -req -in etcd-apiserver.csr -CA etcd-ca.pem -CAkey etcd-ca-key.pem -CAcreateserial -out etcd-apiserver.pem -days 365 -extensions v3_req -extfile openssl.cnf
+
 #create worker certs
 for i in ${WORKER_HOSTS[@]}; do
 openssl genrsa -out ${i}-worker-key.pem 2048
 WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=${i}" -config ../template/worker-openssl.cnf
 WORKER_IP=${i} openssl x509 -req -in ${i}-worker.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out ${i}-worker.pem -days 365 -extensions v3_req -extfile ../template/worker-openssl.cnf
 done
+
+#create ETCD-worker certs
+for i in ${WORKER_HOSTS[@]}; do
+openssl genrsa -out ${i}-etcd-worker-key.pem 2048
+WORKER_IP=${i} openssl req -new -key ${i}-etcd-worker-key.pem -out ${i}-etcd-worker.csr -subj "/CN=${i}" -config ../template/worker-openssl.cnf
+WORKER_IP=${i} openssl x509 -req -in ${i}-etcd-worker.csr -CA etcd-ca.pem -CAkey etcd-ca-key.pem -CAcreateserial -out ${i}-etcd-worker.pem -days 365 -extensions v3_req -extfile ../template/worker-openssl.cnf
+done
+
 
 #create admin certs
 openssl genrsa -out admin-key.pem 2048
@@ -71,16 +89,27 @@ openssl x509 -req -in demouser.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial 
 #gzip base64 encode files to store in the cloud init files.
 CAKEY=$(cat ca-key.pem | gzip | base64 -w0)
 CACERT=$(cat ca.pem | gzip | base64 -w0)
+ETCDCAKEY=$(cat etcd-ca-key.pem | gzip | base64 -w0)
+ETCDCACERT=$(cat etcd-ca.pem | gzip | base64 -w0)
 APISERVERKEY=$(cat apiserver-key.pem | gzip | base64 -w0)
 APISERVER=$(cat apiserver.pem | gzip | base64 -w0)
+ETCDAPISERVERKEY=$(cat etcd-apiserver-key.pem | gzip | base64 -w0)
+ETCDAPISERVER=$(cat etcd-apiserver.pem | gzip | base64 -w0)
+
 
 for i in ${WORKER_HOSTS[@]}; do
 	j=$i-worker-key.pem
 	k=$i-worker.pem
+	l=$i-etcd-worker-key.pem
+	m=$i-etcd-worker.pem
 	WORKERKEY=$(cat $j | gzip | base64 -w0)
 	WORKER=$(cat $k | gzip | base64 -w0)
+	ETCDWORKERKEY=$(cat $l | gzip | base64 -w0)
+	ETCDWORKER=$(cat $m | gzip | base64 -w0)
 	echo WORKERKEY_$i:$WORKERKEY >> index.txt
 	echo WORKER_$i:$WORKER >> index.txt
+	echo ETCDWORKERKEY_$i:$ETCDWORKERKEY >> index.txt
+	echo ETCDWORKER_$i:$ETCDWORKER >> index.txt
 done
 
 ADMINKEY=`cat admin-key.pem | gzip | base64 -w0`
@@ -89,6 +118,8 @@ ADMIN=`cat admin.pem | gzip | base64 -w0`
 #create indexfile with hashes
 echo CAKEY:$CAKEY >> index.txt
 echo CACERT:$CACERT >> index.txt
+echo ETCDCAKEY:$ETCDCAKEY >> index.txt
+echo ETCDCACERT:$ETCDCACERT >> index.txt
 echo APISERVERKEY:$APISERVERKEY >> index.txt
 echo APISERVER:$APISERVER >> index.txt
 echo ADMINKEY:$ADMINKEY >> index.txt
@@ -110,9 +141,12 @@ sed -e "s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g" \
 -e "s,USER_CORE_SSHKEY2,${USER_CORE_KEY2}," \
 -e "s,USER_CORE_PASSWORD,$HASHED_USER_CORE_PASSWORD,g" \
 -e "s,K8S_VER,$K8S_VER,g" \
--e "s,CACERT,$CACERT,g" \
--e "s,APISERVERKEY,$APISERVERKEY,g" \
--e "s,APISERVER,$APISERVER,g" \
+-e "s,\<CACERT\>,$CACERT,g" \
+-e "s,\<APISERVERKEY\>,$APISERVERKEY,g" \
+-e "s,\<APISERVER\>,$APISERVER,g" \
+-e "s,ETCDCACERT,$ETCDCACERT,g" \
+-e "s,ETCDAPISERVERKEY,$ETCDAPISERVERKEY,g" \
+-e "s,ETCDAPISERVER,$ETCDAPISERVER,g" \
 ../template/controller.yaml > node_$MASTER_HOST_IP.yaml
 echo ----------------------
 echo Generated: Master: node_$MASTER_HOST_IP.yaml
@@ -130,9 +164,12 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,USER_CORE_SSHKEY2,${USER_CORE_KEY2}," \
 -e "s,USER_CORE_PASSWORD,$HASHED_USER_CORE_PASSWORD,g" \
 -e "s,K8S_VER,$K8S_VER,g" \
--e "s,CACERT,$CACERT,g" \
--e "s,WORKERKEY,`cat index.txt|grep WORKERKEY_$i|cut -d: -f2`,g" \
--e "s,WORKER,`cat index.txt|grep WORKER_$i|cut -d: -f2`,g" \
+-e "s,/<CACERT/>,$CACERT,g" \
+-e "s,/<WORKERKEY/>,`cat index.txt|grep -w WORKERKEY_$i|cut -d: -f2`,g" \
+-e "s,/<WORKER/>,`cat index.txt|grep -w WORKER_$i|cut -d: -f2`,g" \
+-e "s,ETCDCACERT,$ETCDCACERT,g" \
+-e "s,ETCDWORKERKEY,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
+-e "s,ETCDWORKER,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
 ../template/worker.yaml > node_$i.yaml
 echo Generated: Worker: node_$i.yaml
 done
