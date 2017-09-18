@@ -470,7 +470,7 @@ write_files:
     encoding: "gzip+base64"
     owner: "root"
     content: |
-      ETCDCACERT            
+      ETCDCACERT
   - path: /etc/motd.d/k8s.conf
     owner: "root"
     permissions: "0644"
