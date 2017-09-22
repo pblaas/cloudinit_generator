@@ -84,7 +84,9 @@ coreos:
         --cluster_dns=CLUSTER_DNS \
         --cluster_domain=cluster.local \
         --client-ca-file=/etc/kubernetes/ssl/ca.pem \
-        --anonymous-auth=false
+        --anonymous-auth=false \
+        --cloud-provider=openstack \
+        --cloud-config=/etc/kubernetes/cloud.conf
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
         RestartSec=10
@@ -285,6 +287,8 @@ write_files:
           - --kubelet-client-certificate=/etc/kubernetes/ssl/apiserver.pem
           - --kubelet-client-key=/etc/kubernetes/ssl/apiserver-key.pem
           - --anonymous-auth=false
+          - --cloud-provider=openstack
+          - --cloud-config=/etc/kubernetes/cloud.conf
           livenessProbe:
             httpGet:
               host: 127.0.0.1
@@ -306,6 +310,9 @@ write_files:
           - mountPath: /etc/ssl/certs
             name: ssl-certs-host
             readOnly: true
+          - mountPath: /etc/kubernetes/cloud.conf
+            name: openstack-config
+            readOnly: true
         volumes:
         - hostPath:
             path: /etc/kubernetes/ssl
@@ -313,6 +320,9 @@ write_files:
         - hostPath:
             path: /usr/share/ca-certificates
           name: ssl-certs-host
+        - hostPath:
+            path: /etc/kubernetes/cloud.conf
+          name: opentack-config
   - path: "/etc/kubernetes/manifests/kube-proxy.yaml"
     permissions: "0644"
     owner: "root"
@@ -364,6 +374,8 @@ write_files:
           - --leader-elect=true
           - --service-account-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
           - --root-ca-file=/etc/kubernetes/ssl/ca.pem
+          - --cloud-provider=openstack
+          - --cloud-config=/etc/kubernetes/cloud.conf
           resources:
             requests:
               cpu: 200m
@@ -381,6 +393,9 @@ write_files:
           - mountPath: /etc/ssl/certs
             name: ssl-certs-host
             readOnly: true
+          - mountPath: /etc/kubernetes/cloud.conf
+            name: openstack-config
+            readOnly: true
         volumes:
         - hostPath:
             path: /etc/kubernetes/ssl
@@ -388,6 +403,9 @@ write_files:
         - hostPath:
             path: /usr/share/ca-certificates
           name: ssl-certs-host
+        - hostPath:
+            path: /etc/kubernetes/cloud.conf
+          name: opentack-config
   - path: "/etc/kubernetes/manifests/kube-scheduler.yaml"
     permissions: "0644"
     owner: "root"
@@ -471,6 +489,12 @@ write_files:
     owner: "root"
     content: |
       ETCDCACERT
+  - path: "/etc/kubernetes/cloud.conf"
+    permissions: "0664"
+    encoding: "gzip+base64"
+    owner: "root"
+    content: |
+      CLOUDCONF
   - path: /etc/motd.d/k8s.conf
     owner: "root"
     permissions: "0644"
