@@ -6,10 +6,18 @@ coreos:
     interface: WORKER_IP
   etcd2:
     discovery: https://discovery.etcd.io/DISCOVERY_ID
-    advertise-client-urls: http://WORKER_IP:2379
-    initial-advertise-peer-urls: http://WORKER_IP:2380
-    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    listen-peer-urls: http://WORKER_IP:2380
+    advertise-client-urls: https://WORKER_IP:2379
+    initial-advertise-peer-urls: https://WORKER_IP:2380
+    listen-client-urls: http://127.0.0.1:2379,https://WORKER_IP:2379
+    listen-peer-urls: https://WORKER_IP:2380
+    cert-file: /etc/kubernetes/ssl/etcd-worker.pem
+    key-file: /etc/kubernetes/ssl/etcd-worker-key.pem
+    trusted-ca-file: /etc/kubernetes/ssl/etcd-ca.pem
+    client-cert-auth: true
+    peer-cert-file: /etc/kubernetes/ssl/etcd-worker.pem
+    peer-key-file: /etc/kubernetes/ssl/etcd-worker-key.pem
+    peer-trusted-ca-file: /etc/kubernetes/ssl/etcd-ca.pem
+    peer-client-cert-auth: true
     proxy: on
   fleet:
     metadata: "role=node"
@@ -237,6 +245,9 @@ write_files:
     content: |
       FLANNELD_IFACE=WORKER_IP
       FLANNELD_ETCD_ENDPOINTS=ETCD_ENDPOINTS_URLS
+      FLANNELD_ETCD_KEYFILE=/etc/ssl/certs/etcd-worker-key.pem
+      FLANNELD_ETCD_CERTFILE=/etc/ssl/certs/etcd-worker.pem
+      FLANNELD_ETCD_CAFILE=/etc/ssl/certs/etcd-ca.pem
   - path: "/etc/kubernetes/manifests/kube-proxy.yaml"
     permissions: "0644"
     owner: "root"
@@ -318,6 +329,42 @@ write_files:
     owner: "root"
     content: |
       WORKER
+  - path: "/etc/kubernetes/ssl/etcd-ca.pem"
+    permissions: "0664"
+    encoding: "gzip+base64"
+    owner: "root"
+    content: |
+      ETCDCACERT
+  - path: "/etc/kubernetes/ssl/etcd-worker-key.pem"
+    permissions: "0644"
+    encoding: "gzip+base64"
+    owner: "root"
+    content: |
+      ETCDWORKERKEY
+  - path: "/etc/kubernetes/ssl/etcd-worker.pem"
+    permissions: "0664"
+    encoding: "gzip+base64"
+    owner: "root"
+    content: |
+      ETCDWORKER
+  - path: "/etc/ssl/certs/etcd-ca.pem"
+    permissions: "0664"
+    encoding: "gzip+base64"
+    owner: "root"
+    content: |
+      ETCDCACERT
+  - path: "/etc/ssl/certs/etcd-worker-key.pem"
+    permissions: "0644"
+    encoding: "gzip+base64"
+    owner: "root"
+    content: |
+      ETCDWORKERKEY
+  - path: "/etc/ssl/certs/etcd-worker.pem"
+    permissions: "0664"
+    encoding: "gzip+base64"
+    owner: "root"
+    content: |
+      ETCDWORKER
   - path: /etc/motd.d/k8s.conf
     owner: "root"
     permissions: "0644"
