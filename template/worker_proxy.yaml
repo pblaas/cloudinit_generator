@@ -89,7 +89,7 @@ coreos:
         --client-ca-file=/etc/kubernetes/ssl/ca.pem \
         --anonymous-auth=false \
         --cloud-provider=openstack \
-        --cloud-config=/etc/kubernetes/cloud.conf
+        --cloud-config=/etc/kubernetes/ssl/cloud.conf
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
         RestartSec=10
@@ -367,7 +367,7 @@ write_files:
     owner: "root"
     content: |
       ETCDWORKER
-  - path: "/etc/kubernetes/cloud.conf"
+  - path: "/etc/kubernetes/ssl/cloud.conf"
     permissions: "0664"
     encoding: "gzip+base64"
     owner: "root"

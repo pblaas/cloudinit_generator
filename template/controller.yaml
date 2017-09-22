@@ -288,7 +288,7 @@ write_files:
           - --kubelet-client-key=/etc/kubernetes/ssl/apiserver-key.pem
           - --anonymous-auth=false
           - --cloud-provider=openstack
-          - --cloud-config=/etc/kubernetes/cloud.conf
+          - --cloud-config=/etc/kubernetes/ssl/cloud.conf
           livenessProbe:
             httpGet:
               host: 127.0.0.1
@@ -310,9 +310,6 @@ write_files:
           - mountPath: /etc/ssl/certs
             name: ssl-certs-host
             readOnly: true
-          - mountPath: /etc/kubernetes/cloud.conf
-            name: openstack-config
-            readOnly: true
         volumes:
         - hostPath:
             path: /etc/kubernetes/ssl
@@ -320,9 +317,6 @@ write_files:
         - hostPath:
             path: /usr/share/ca-certificates
           name: ssl-certs-host
-        - hostPath:
-            path: /etc/kubernetes/cloud.conf
-          name: opentack-config
   - path: "/etc/kubernetes/manifests/kube-proxy.yaml"
     permissions: "0644"
     owner: "root"
@@ -375,7 +369,7 @@ write_files:
           - --service-account-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
           - --root-ca-file=/etc/kubernetes/ssl/ca.pem
           - --cloud-provider=openstack
-          - --cloud-config=/etc/kubernetes/cloud.conf
+          - --cloud-config=/etc/kubernetes/ssl/cloud.conf
           resources:
             requests:
               cpu: 200m
@@ -393,9 +387,6 @@ write_files:
           - mountPath: /etc/ssl/certs
             name: ssl-certs-host
             readOnly: true
-          - mountPath: /etc/kubernetes/cloud.conf
-            name: openstack-config
-            readOnly: true
         volumes:
         - hostPath:
             path: /etc/kubernetes/ssl
@@ -403,9 +394,6 @@ write_files:
         - hostPath:
             path: /usr/share/ca-certificates
           name: ssl-certs-host
-        - hostPath:
-            path: /etc/kubernetes/cloud.conf
-          name: opentack-config
   - path: "/etc/kubernetes/manifests/kube-scheduler.yaml"
     permissions: "0644"
     owner: "root"
@@ -490,6 +478,12 @@ write_files:
     content: |
       ETCDCACERT
   - path: "/etc/kubernetes/cloud.conf"
+    permissions: "0664"
+    encoding: "gzip+base64"
+    owner: "root"
+    content: |
+      CLOUDCONF
+  - path: "/etc/kubernetes/ssl/cloud.conf"
     permissions: "0664"
     encoding: "gzip+base64"
     owner: "root"
