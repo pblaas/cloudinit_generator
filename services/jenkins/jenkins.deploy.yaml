@@ -4,7 +4,7 @@ metadata:
   name: jenkins-home-claim
   namespace: jenkins
   annotations:
-    volume.beta.kubernetes.io/storage-class: "slow"
+    volume.beta.kubernetes.io/storage-class: "gold"
   labels:
     app: jenkins
 spec:
