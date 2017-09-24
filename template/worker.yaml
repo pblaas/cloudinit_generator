@@ -87,7 +87,9 @@ coreos:
         --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
         --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem \
         --client-ca-file=/etc/kubernetes/ssl/ca.pem \
-        --anonymous-auth=false
+        --anonymous-auth=false \
+        --cloud-provider=openstack \
+        --cloud-config=/etc/kubernetes/ssl/cloud.conf
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
         RestartSec=10
@@ -365,6 +367,12 @@ write_files:
     owner: "root"
     content: |
       ETCDWORKER
+  - path: "/etc/kubernetes/ssl/cloud.conf"
+    permissions: "0664"
+    encoding: "gzip+base64"
+    owner: "root"
+    content: |
+      CLOUDCONF
   - path: /etc/motd.d/k8s.conf
     owner: "root"
     permissions: "0644"
