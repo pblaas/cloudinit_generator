@@ -114,6 +114,7 @@ done
 
 ADMINKEY=`cat admin-key.pem | gzip | base64 -w0`
 ADMIN=`cat admin.pem | gzip | base64 -w0`
+CLOUDCONF=`cat ../../cloud.conf | gzip | base64 -w0`
 
 #create indexfile with hashes
 echo CAKEY:$CAKEY >> index.txt
@@ -124,6 +125,7 @@ echo APISERVERKEY:$APISERVERKEY >> index.txt
 echo APISERVER:$APISERVER >> index.txt
 echo ADMINKEY:$ADMINKEY >> index.txt
 echo ADMIN:$ADMIN >> index.txt
+echo CLOUDCONF:$CLOUDCONF >> index.txt
 
 #convert ssh public key to base64 gzip.
 UCK1=`echo $USER_CORE_KEY1 | gzip | base64 -w0`
@@ -147,6 +149,7 @@ sed -e "s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g" \
 -e "s,ETCDCACERT,$ETCDCACERT,g" \
 -e "s,ETCDAPISERVERKEY,$ETCDAPISERVERKEY,g" \
 -e "s,ETCDAPISERVER,$ETCDAPISERVER,g" \
+-e "s,CLOUDCONF,$CLOUDCONF,g" \
 ../template/controller.yaml > node_$MASTER_HOST_IP.yaml
 echo ----------------------
 echo Generated: Master: node_$MASTER_HOST_IP.yaml
@@ -170,6 +173,7 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,ETCDCACERT,$ETCDCACERT,g" \
 -e "s,ETCDWORKERKEY,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
 -e "s,ETCDWORKER,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
+-e "s,CLOUDCONF,$CLOUDCONF,g" \
 ../template/worker.yaml > node_$i.yaml
 echo Generated: Worker: node_$i.yaml
 done

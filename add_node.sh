@@ -77,6 +77,7 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,ETCDCACERT,`cat index.txt|grep -w ETCDCACERT|cut -d: -f2`,g" \
 -e "s,ETCDWORKERKEY,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
 -e "s,ETCDWORKER,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
+-e "s,CLOUDCONF,`cat index.txt|grep -w CLOUDCONF|cut -d: -f2`,g" \
 ../template/worker_proxy.yaml > node_$i.yaml
 echo Generated: node_$i.yaml
 done
