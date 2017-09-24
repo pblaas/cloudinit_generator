@@ -43,7 +43,7 @@ spec:
               key: jenkins-admin-user
               name: jenkins
         name: master
-        image: jenkins:2.60.1
+        image: jenkins/jenkins:2.73.1
         ports:
         - containerPort: 8080
         - containerPort: 50000
