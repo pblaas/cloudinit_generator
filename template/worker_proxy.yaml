@@ -88,7 +88,7 @@ coreos:
         --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem \
         --client-ca-file=/etc/kubernetes/ssl/ca.pem \
         --anonymous-auth=false \
-        --cloud-provider=openstack \
+        --cloud-provider=CLOUD_PROVIDER \
         --cloud-config=/etc/kubernetes/ssl/cloud.conf
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
