@@ -85,7 +85,7 @@ coreos:
         --cluster_domain=cluster.local \
         --client-ca-file=/etc/kubernetes/ssl/ca.pem \
         --anonymous-auth=false \
-        --cloud-provider=openstack \
+        --cloud-provider=CLOUD_PROVIDER \
         --cloud-config=/etc/kubernetes/cloud.conf
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/run/kubelet-pod.uuid
         Restart=always
@@ -287,7 +287,7 @@ write_files:
           - --kubelet-client-certificate=/etc/kubernetes/ssl/apiserver.pem
           - --kubelet-client-key=/etc/kubernetes/ssl/apiserver-key.pem
           - --anonymous-auth=false
-          - --cloud-provider=openstack
+          - --cloud-provider=CLOUD_PROVIDER
           - --cloud-config=/etc/kubernetes/ssl/cloud.conf
           livenessProbe:
             httpGet:
@@ -368,7 +368,7 @@ write_files:
           - --leader-elect=true
           - --service-account-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
           - --root-ca-file=/etc/kubernetes/ssl/ca.pem
-          - --cloud-provider=openstack
+          - --cloud-provider=CLOUD_PROVIDER
           - --cloud-config=/etc/kubernetes/ssl/cloud.conf
           resources:
             requests:

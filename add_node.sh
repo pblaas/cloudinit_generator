@@ -70,6 +70,7 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,USER_CORE_SSHKEY1,${USER_CORE_KEY1}," \
 -e "s,USER_CORE_SSHKEY2,${USER_CORE_KEY2}," \
 -e "s,USER_CORE_PASSWORD,${HASHED_USER_CORE_PASSWORD},g" \
+-e "s,CLOUD_PROVIDER,${CLOUD_PROVIDER},g" \
 -e "s,K8S_VER,$K8S_VER,g" \
 -e "s,\<CACERT\>,$CACERT,g" \
 -e "s,\<WORKERKEY\>,`cat index.txt|grep -w WORKERKEY_$i|cut -d: -f2`,g" \
