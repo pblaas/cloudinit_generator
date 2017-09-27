@@ -546,13 +546,13 @@ write_files:
       clusters:
       - name: local
         cluster:
-          server: http://localhost:8080
+          server: https://MASTER_HOST_IP
           certificate-authority: /etc/kubernetes/ssl/ca.pem
       users:
       - name: kubelet
         user:
           client-certificate: /etc/kubernetes/ssl/apiserver.pem
-          client-key: /etc/kubernetes/ssl/apiserver-key.pem      
+          client-key: /etc/kubernetes/ssl/apiserver-key.pem
       contexts:
       - context:
           cluster: local
