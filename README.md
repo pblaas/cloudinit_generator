@@ -1,5 +1,5 @@
 ## Cloudinit generator
-This script and templates can be used to simplify deployment of a LOCAL Container Linux Kubernetes cluster. It contains 3 steps.
+This script and templates can be used to simplify deployment of a CoreOS Container Linux Kubernetes cluster. It contains 3 steps.
 
 ### Modify
 Change the config.env with the required settings.
