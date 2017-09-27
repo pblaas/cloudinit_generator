@@ -73,7 +73,8 @@ coreos:
         ExecStartPre=/usr/bin/mkdir -p /var/log/containers
         ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
         ExecStart=/usr/lib/coreos/kubelet-wrapper \
-        --api-servers=http://127.0.0.1:8080 \
+        --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml \
+        --require-kubeconfig \
         --register-schedulable=false \
         --cni-conf-dir=/etc/kubernetes/cni/net.d \
         --network-plugin=cni \
@@ -337,16 +338,29 @@ write_files:
           - --master=http://127.0.0.1:8080
           - --cluster-cidr=10.2.0.0/16
           - --conntrack-max-per-core=0
+          - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
           securityContext:
             privileged: true
           volumeMounts:
           - mountPath: /etc/ssl/certs
             name: ssl-certs-host
             readOnly: true
+          - mountPath: /etc/kubernetes/master-kubeconfig.yaml
+            name: "kubeconfig"
+            readOnly: true
+          - mountPath: /etc/kubernetes/ssl
+            name: "etc-kube-ssl"
+            readOnly: true
         volumes:
         - hostPath:
             path: /usr/share/ca-certificates
           name: ssl-certs-host
+        - name: "kubeconfig"
+          hostPath:
+            path: "/etc/kubernetes/master-kubeconfig.yaml"
+        - name: "etc-kube-ssl"
+          hostPath:
+            path: "/etc/kubernetes/ssl"
   - path: "/etc/kubernetes/manifests/kube-controller-manager.yaml"
     permissions: "0644"
     owner: "root"
@@ -370,6 +384,7 @@ write_files:
           - --root-ca-file=/etc/kubernetes/ssl/ca.pem
           - --cloud-provider=CLOUD_PROVIDER
           - --cloud-config=/etc/kubernetes/ssl/cloud.conf
+          - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
           resources:
             requests:
               cpu: 200m
@@ -381,19 +396,25 @@ write_files:
             initialDelaySeconds: 15
             timeoutSeconds: 15
           volumeMounts:
-          - mountPath: /etc/kubernetes/ssl
-            name: ssl-certs-kubernetes
-            readOnly: true
           - mountPath: /etc/ssl/certs
             name: ssl-certs-host
             readOnly: true
+          - mountPath: /etc/kubernetes/master-kubeconfig.yaml
+            name: "kubeconfig"
+            readOnly: true
+          - mountPath: /etc/kubernetes/ssl
+            name: "etc-kube-ssl"
+            readOnly: true
         volumes:
-        - hostPath:
-            path: /etc/kubernetes/ssl
-          name: ssl-certs-kubernetes
         - hostPath:
             path: /usr/share/ca-certificates
           name: ssl-certs-host
+        - name: "kubeconfig"
+          hostPath:
+            path: "/etc/kubernetes/master-kubeconfig.yaml"
+        - name: "etc-kube-ssl"
+          hostPath:
+            path: "/etc/kubernetes/ssl"
   - path: "/etc/kubernetes/manifests/kube-scheduler.yaml"
     permissions: "0644"
     owner: "root"
@@ -413,6 +434,7 @@ write_files:
           - scheduler
           - --master=http://127.0.0.1:8080
           - --leader-elect=true
+          - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
           resources:
             requests:
               cpu: 100m
@@ -423,6 +445,26 @@ write_files:
               port: 10251
             initialDelaySeconds: 15
             timeoutSeconds: 15
+          volumeMounts:
+          - mountPath: /etc/ssl/certs
+            name: ssl-certs-host
+            readOnly: true
+          - mountPath: /etc/kubernetes/master-kubeconfig.yaml
+            name: "kubeconfig"
+            readOnly: true
+          - mountPath: /etc/kubernetes/ssl
+            name: "etc-kube-ssl"
+            readOnly: true
+        volumes:
+        - hostPath:
+            path: /usr/share/ca-certificates
+          name: ssl-certs-host
+        - name: "kubeconfig"
+          hostPath:
+            path: "/etc/kubernetes/master-kubeconfig.yaml"
+        - name: "etc-kube-ssl"
+          hostPath:
+            path: "/etc/kubernetes/ssl"
   - path: "/etc/kubernetes/ssl/apiserver-key.pem"
     permissions: "0600"
     encoding: "gzip+base64"
@@ -495,6 +537,24 @@ write_files:
     encoding: "gzip+base64"
     content: |
       H4sIAJ7IHVkAA3WTO7rEIAiF+6zCng/oWQ07oKDK7u9Bx6iTuTTx8R8CAq19mzOLv05h1/eBsEbed2YYvxQ77WKUIKdBoafi+kkSP8tSyEmfPu/b2rGFwhfN5xWRNKU4BLHo6HuxvJPY3aUiw0ejDqzjPGn++DRBTkAyERt+YRAIUy7n13RdvDTQuC261BUszVhk0DL33CRUqjaIxGoR2nz6okFPdfZlasVWz8zRPdrm/Go+c0dkpFaP61EalECJ16+1aO1+FVzVXZitQCwhrG5xg6gzDjo/dCDIHhUViXSrWyqVoEEjr6utIt/qbhFeR+R4RFRJZpJ4+fLdXB8+qjYgqp/wBzz+djVruRygov5YW2yORhld5TbPzQl1gWUmP15Czo6VkUjyUzts7HNo72ngo+c2Da2B2GZny3Zje3a/Jg0z+TLZ799T/K9df0AUN+scBAAA
+  - path: "/etc/kubernetes/master-kubeconfig.yaml"
+    permissions: "0644"
+    owner: "root"
+    content: |
+      apiVersion: v1
+      kind: Config
+      clusters:
+      - name: local
+        cluster:
+          server: http://localhost:8080
+      users:
+      - name: kubelet
+      contexts:
+      - context:
+          cluster: local
+          user: kubelet
+        name: kubelet-context
+      current-context: kubelet-context
   - path: /etc/ntp.conf
     content: |
       server 0.europe.pool.ntp.org

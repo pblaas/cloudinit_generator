@@ -73,7 +73,6 @@ coreos:
         ExecStartPre=/usr/bin/mkdir -p /var/log/containers
         ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
         ExecStart=/usr/lib/coreos/kubelet-wrapper \
-        --api-servers=https://MASTER_HOST_IP \
         --cni-conf-dir=/etc/kubernetes/cni/net.d \
         --container-runtime=docker \
         --network-plugin=cni \
@@ -84,6 +83,7 @@ coreos:
         --cluster_dns=CLUSTER_DNS \
         --cluster_domain=cluster.local \
         --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
+        --require-kubeconfig \
         --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
         --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem \
         --client-ca-file=/etc/kubernetes/ssl/ca.pem \
@@ -301,6 +301,7 @@ write_files:
       clusters:
       - name: local
         cluster:
+          server: https://MASTER_HOST_IP
           certificate-authority: /etc/kubernetes/ssl/ca.pem
       users:
       - name: kubelet
