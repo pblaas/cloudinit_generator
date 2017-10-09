@@ -251,6 +251,7 @@ write_files:
       FLANNELD_ETCD_KEYFILE=/etc/ssl/certs/etcd-apiserver-key.pem
       FLANNELD_ETCD_CERTFILE=/etc/ssl/certs/etcd-apiserver.pem
       FLANNELD_ETCD_CAFILE=/etc/ssl/certs/etcd-ca.pem
+      FLANNEL_IMAGE_TAG=v0.7.1
   - path: "/etc/kubernetes/manifests/kube-apiserver.yaml"
     permissions: "0644"
     owner: "root"
