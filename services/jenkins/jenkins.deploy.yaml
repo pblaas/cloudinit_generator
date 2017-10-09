@@ -77,7 +77,7 @@ spec:
       - command:
         - sh
         - /var/jenkins_config/apply_config.sh
-        image: jenkinsci/jenkins:2.60.1
+        image: jenkinsci/jenkins:2.73.1
         imagePullPolicy: Always
         name: copy-default-config
         resources: {}
