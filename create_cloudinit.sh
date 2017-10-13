@@ -151,6 +151,7 @@ sed -e "s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g" \
 -e "s,ETCDAPISERVERKEY,$ETCDAPISERVERKEY,g" \
 -e "s,ETCDAPISERVER,$ETCDAPISERVER,g" \
 -e "s,CLOUDCONF,$CLOUDCONF,g" \
+-e "s,FLANNEL_VER,$FLANNEL_VER,g" \
 ../template/controller.yaml > node_$MASTER_HOST_IP.yaml
 echo ----------------------
 echo Generated: Master: node_$MASTER_HOST_IP.yaml
@@ -176,6 +177,7 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,ETCDWORKERKEY,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
 -e "s,ETCDWORKER,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
 -e "s,CLOUDCONF,$CLOUDCONF,g" \
+-e "s,FLANNEL_VER,$FLANNEL_VER,g" \
 ../template/worker.yaml > node_$i.yaml
 echo Generated: Worker: node_$i.yaml
 done
