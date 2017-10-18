@@ -51,11 +51,14 @@ for i in $1; do
 	WORKER=$(cat $k | gzip | base64 -w0)
 	ETCDWORKERKEY=$(cat $l | gzip | base64 -w0)
 	ETCDWORKER=$(cat $m | gzip | base64 -w0)
+	ETCDWORKERKEY_BASE64=$(cat $l  base64 -w0)
+	ETCDWORKER_BASE64=$(cat $m | base64 -w0)
 	echo WORKERKEY_$i:$WORKERKEY >> index.txt
 	echo WORKER_$i:$WORKER >> index.txt
 	echo ETCDWORKERKEY_$i:$ETCDWORKERKEY >> index.txt
 	echo ETCDWORKER_$i:$ETCDWORKER >> index.txt
-
+	echo ETCDWORKERKEY_BASE64_$i:$ETCDWORKERKEY_BASE64 >> index.txt
+	echo ETCDWORKER_BASE64_$i:$ETCDWORKER_BASE64 >> index.txt
 done
 
 #genereate the worker yamls from the worker.yaml template
@@ -79,6 +82,10 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,ETCDWORKERKEY,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
 -e "s,ETCDWORKER,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
 -e "s,CLOUDCONF,`cat index.txt|grep -w CLOUDCONF|cut -d: -f2`,g" \
+-e "s,ETCDCACERT_BASE64,$ETCDCACERT_BASE64,g" \
+-e "s,\<ETCDWORKERKEY_BASE64\>,`cat index.txt|grep -w ETCDWORKERKEY_BASE64_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDWORKER_BASE64\>,`cat index.txt|grep -w ETCDWORKER_BASE64_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDCACERT_BASE64\>,`cat index.txt|grep -w ETCDCACERT_BASE64|cut -d: -f2`,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
 ../template/worker_proxy.yaml > node_$i.yaml
 echo Generated: node_$i.yaml
