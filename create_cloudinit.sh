@@ -200,6 +200,7 @@ sed -e "s,\<ETCDCACERTBASE64\>,$ETCDCACERTBASE64,g" \
 ../template/calico.tmpl.yaml > calico.yaml
 echo Generated: Calico.yaml
 echo ---------------------
+cp ../template/calico_ctl_tmpl.yaml calico_ctl.yaml
 cd -
 
 echo You can run the following to interact with your new cluster:
