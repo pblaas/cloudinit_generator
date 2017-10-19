@@ -78,14 +78,14 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,\<CACERT\>,$CACERT,g" \
 -e "s,\<WORKERKEY\>,`cat index.txt|grep -w WORKERKEY_$i|cut -d: -f2`,g" \
 -e "s,\<WORKER\>,`cat index.txt|grep -w WORKER_$i|cut -d: -f2`,g" \
--e "s,ETCDCACERT,`cat index.txt|grep -w ETCDCACERT|cut -d: -f2`,g" \
--e "s,ETCDWORKERKEY,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
--e "s,ETCDWORKER,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDCACERT\>,`cat index.txt|grep -w ETCDCACERT|cut -d: -f2`,g" \
+-e "s,\<ETCDWORKERKEY\>,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDWORKER\>,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
 -e "s,CLOUDCONF,`cat index.txt|grep -w CLOUDCONF|cut -d: -f2`,g" \
--e "s,ETCDCACERT_BASE64,$ETCDCACERT_BASE64,g" \
--e "s,\<ETCDWORKERKEY_BASE64\>,`cat index.txt|grep -w ETCDWORKERKEY_BASE64_$i|cut -d: -f2`,g" \
--e "s,\<ETCDWORKER_BASE64\>,`cat index.txt|grep -w ETCDWORKER_BASE64_$i|cut -d: -f2`,g" \
--e "s,\<ETCDCACERT_BASE64\>,`cat index.txt|grep -w ETCDCACERT_BASE64|cut -d: -f2`,g" \
+-e "s,\<ETCDCACERTBASE64\>,$ETCDCACERTBASE64,g" \
+-e "s,\<ETCDWORKERKEYBASE64\>,`cat index.txt|grep -w ETCDWORKERKEYBASE64_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDWORKERBASE64\>,`cat index.txt|grep -w ETCDWORKERBASE64_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDCACERTBASE64\>,`cat index.txt|grep -w ETCDCACERTBASE64|cut -d: -f2`,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
 ../template/worker_proxy.yaml > node_$i.yaml
 echo Generated: node_$i.yaml

@@ -97,9 +97,9 @@ APISERVER=$(cat apiserver.pem | gzip | base64 -w0)
 ETCDAPISERVERKEY=$(cat etcd-apiserver-key.pem | gzip | base64 -w0)
 ETCDAPISERVER=$(cat etcd-apiserver.pem | gzip | base64 -w0)
 
-ETCDCACERT_BASE64=$(cat etcd-ca.pem | base64 -w0)
-ETCDAPISERVERKEY_BASE64=$(cat etcd-apiserver-key.pem | base64 -w0)
-ETCDAPISERVER_BASE64=$(cat etcd-apiserver.pem | base64 -w0)
+ETCDCACERTBASE64=$(cat etcd-ca.pem | base64 -w0)
+ETCDAPISERVERKEYBASE64=$(cat etcd-apiserver-key.pem | base64 -w0)
+ETCDAPISERVERBASE64=$(cat etcd-apiserver.pem | base64 -w0)
 
 for i in ${WORKER_HOSTS[@]}; do
 	j=$i-worker-key.pem
@@ -110,14 +110,14 @@ for i in ${WORKER_HOSTS[@]}; do
 	WORKER=$(cat $k | gzip | base64 -w0)
 	ETCDWORKERKEY=$(cat $l | gzip | base64 -w0)
 	ETCDWORKER=$(cat $m | gzip | base64 -w0)
-	ETCDWORKERKEY_BASE64=$(cat $l | base64 -w0)
-	ETCDWORKER_BASE64=$(cat $m | base64 -w0)
+	ETCDWORKERKEYBASE64=$(cat $l | base64 -w0)
+	ETCDWORKERBASE64=$(cat $m | base64 -w0)
 	echo WORKERKEY_$i:$WORKERKEY >> index.txt
 	echo WORKER_$i:$WORKER >> index.txt
 	echo ETCDWORKERKEY_$i:$ETCDWORKERKEY >> index.txt
 	echo ETCDWORKER_$i:$ETCDWORKER >> index.txt
-	echo ETCDWORKERKEY_BASE64_$i:$ETCDWORKERKEY_BASE64 >> index.txt
-	echo ETCDWORKER_BASE64_$i:$ETCDWORKER_BASE64 >> index.txt
+	echo ETCDWORKERKEYBASE64_$i:$ETCDWORKERKEYBASE64 >> index.txt
+	echo ETCDWORKERBASE64_$i:$ETCDWORKERBASE64 >> index.txt
 done
 
 ADMINKEY=`cat admin-key.pem | gzip | base64 -w0`
@@ -129,7 +129,7 @@ echo CAKEY:$CAKEY >> index.txt
 echo CACERT:$CACERT >> index.txt
 echo ETCDCAKEY:$ETCDCAKEY >> index.txt
 echo ETCDCACERT:$ETCDCACERT >> index.txt
-echo ETCDCACERT_BASE64:$ETCDCACERT_BASE64 >> index.txt
+echo ETCDCACERTBASE64:$ETCDCACERTBASE64 >> index.txt
 echo APISERVERKEY:$APISERVERKEY >> index.txt
 echo APISERVER:$APISERVER >> index.txt
 echo ADMINKEY:$ADMINKEY >> index.txt
@@ -157,13 +157,13 @@ sed -e "s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g" \
 -e "s,\<APISERVERKEY\>,$APISERVERKEY,g" \
 -e "s,\<APISERVER\>,$APISERVER,g" \
 -e "s,\<ETCDCACERT\>,$ETCDCACERT,g" \
--e "s,ETCDAPISERVERKEY,$ETCDAPISERVERKEY,g" \
--e "s,ETCDAPISERVER,$ETCDAPISERVER,g" \
+-e "s,\<ETCDAPISERVERKEY\>,$ETCDAPISERVERKEY,g" \
+-e "s,\<ETCDAPISERVER\>,$ETCDAPISERVER,g" \
 -e "s,CLOUDCONF,$CLOUDCONF,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
--e "s,ETCDCACERT_BASE64,$ETCDCACERT_BASE64,g" \
--e "s,\<ETCDAPISERVERKEY_BASE64\>,$ETCDAPISERVERKEY_BASE64,g" \
--e "s,\<ETCDAPISERVER_BASE64\>,$ETCDAPISERVER_BASE64,g" \
+-e "s,\<ETCDCACERTBASE64\>,$ETCDCACERTBASE64,g" \
+-e "s,\<ETCDAPISERVERKEYBASE64\>,$ETCDAPISERVERKEYBASE64,g" \
+-e "s,\<ETCDAPISERVERBASE64\>,$ETCDAPISERVERBASE64,g" \
 ../template/controller.yaml > node_$MASTER_HOST_IP.yaml
 echo ----------------------
 echo Generated: Master: node_$MASTER_HOST_IP.yaml
@@ -186,11 +186,11 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,\<WORKERKEY\>,`cat index.txt|grep -w WORKERKEY_$i|cut -d: -f2`,g" \
 -e "s,\<WORKER\>,`cat index.txt|grep -w WORKER_$i|cut -d: -f2`,g" \
 -e "s,\<ETCDCACERT\>,$ETCDCACERT,g" \
--e "s,ETCDWORKERKEY,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
--e "s,ETCDWORKER,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
--e "s,ETCDCACERT_BASE64,$ETCDCACERT_BASE64,g" \
--e "s,\<ETCDWORKERKEY_BASE64\>,`cat index.txt|grep -w ETCDWORKERKEY_BASE64_$i|cut -d: -f2`,g" \
--e "s,\<ETCDWORKER_BASE64\>,`cat index.txt|grep -w ETCDWORKER_BASE64_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDWORKERKEY\>,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDWORKER\>,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDCACERTBASE64\>,$ETCDCACERT_BASE64,g" \
+-e "s,\<ETCDWORKERKEYBASE64\>,`cat index.txt|grep -w ETCDWORKERKEYBASE64_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDWORKERBASE64\>,`cat index.txt|grep -w ETCDWORKERBASE64_$i|cut -d: -f2`,g" \
 -e "s,CLOUDCONF,$CLOUDCONF,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
 ../template/worker.yaml > node_$i.yaml

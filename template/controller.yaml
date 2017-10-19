@@ -495,9 +495,9 @@ write_files:
         # not using TLS for etcd.
         # This self-hosted install expects three files with the following names.  The values
         # should be base64 encoded strings of the entire contents of each file.
-        etcd-key: ETCDAPISERVERKEY_BASE64
-        etcd-cert: ETCDAPISERVER_BASE64
-        etcd-ca: ETCDCACERT_BASE64
+        etcd-key: ETCDAPISERVERKEYBASE64
+        etcd-cert: ETCDAPISERVERBASE64
+        etcd-ca: ETCDCACERTBASE64
 
       ---
 
