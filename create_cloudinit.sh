@@ -196,6 +196,7 @@ echo ---------------------
 sed -e "s,\<ETCDCACERTBASE64\>,$ETCDCACERTBASE64,g" \
 -e "s,\<ETCDAPISERVERKEYBASE64\>,$ETCDAPISERVERKEYBASE64,g" \
 -e "s,\<ETCDAPISERVERBASE64\>,$ETCDAPISERVERBASE64,g" \
+-e "s@ETCD_ENDPOINTS_URLS@${ETCD_ENDPOINTS_URLS}@g" \
 ../template/calico.tmpl.yaml > calico.yaml
 echo Generated: Calico.yaml
 echo ---------------------
