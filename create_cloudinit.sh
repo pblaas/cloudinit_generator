@@ -161,12 +161,10 @@ sed -e "s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g" \
 -e "s,\<ETCDAPISERVER\>,$ETCDAPISERVER,g" \
 -e "s,CLOUDCONF,$CLOUDCONF,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
--e "s,\<ETCDCACERTBASE64\>,$ETCDCACERTBASE64,g" \
--e "s,\<ETCDAPISERVERKEYBASE64\>,$ETCDAPISERVERKEYBASE64,g" \
--e "s,\<ETCDAPISERVERBASE64\>,$ETCDAPISERVERBASE64,g" \
 ../template/controller.yaml > node_$MASTER_HOST_IP.yaml
 echo ----------------------
 echo Generated: Master: node_$MASTER_HOST_IP.yaml
+
 
 #genereate the worker yamls from the worker.yaml template
 for i in ${WORKER_HOSTS[@]}; do
@@ -188,15 +186,19 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,\<ETCDCACERT\>,$ETCDCACERT,g" \
 -e "s,\<ETCDWORKERKEY\>,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
 -e "s,\<ETCDWORKER\>,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
--e "s,\<ETCDCACERTBASE64\>,$ETCDCACERT_BASE64,g" \
--e "s,\<ETCDWORKERKEYBASE64\>,`cat index.txt|grep -w ETCDWORKERKEYBASE64_$i|cut -d: -f2`,g" \
--e "s,\<ETCDWORKERBASE64\>,`cat index.txt|grep -w ETCDWORKERBASE64_$i|cut -d: -f2`,g" \
 -e "s,CLOUDCONF,$CLOUDCONF,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
 ../template/worker.yaml > node_$i.yaml
 echo Generated: Worker: node_$i.yaml
 done
-echo -----------------------------------
+echo ---------------------
+
+sed -e "s,\<ETCDCACERTBASE64\>,$ETCDCACERTBASE64,g" \
+-e "s,\<ETCDAPISERVERKEYBASE64\>,$ETCDAPISERVERKEYBASE64,g" \
+-e "s,\<ETCDAPISERVERBASE64\>,$ETCDAPISERVERBASE64,g" \
+../template/calico.tmpl.yaml > calico.yaml
+echo Generated: Calico.yaml
+echo ---------------------
 cd -
 
 echo You can run the following to interact with your new cluster:
