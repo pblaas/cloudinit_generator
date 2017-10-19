@@ -1,3 +1,5 @@
+# kubectl exec -ti -n kube-system calicoctl -- /calicoctl get profiles -o wide
+#
 apiVersion: v1
 kind: Pod
 metadata:
