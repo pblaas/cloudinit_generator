@@ -54,7 +54,7 @@ coreos:
             Requires=etcd2.service
             After=etcd2.service
             [Service]
-            ExecStartPre=/usr/bin/etcdctl --cert-file=/etc/kubernetes/ssl/etcd-apiserver.pem --key-file=/etc/kubernetes/ssl/etcd-apiserver-key.pem --ca-file=/etc/kubernetes/ssl/etcd-ca.pem set /coreos.com/network/config '{ "Network": "192.168.0.0/16", "Backend":{"Type":"vxlan"}}'
+            ExecStartPre=/usr/bin/etcdctl --cert-file=/etc/kubernetes/ssl/etcd-apiserver.pem --key-file=/etc/kubernetes/ssl/etcd-apiserver-key.pem --ca-file=/etc/kubernetes/ssl/etcd-ca.pem set /coreos.com/network/config '{ "Network": "10.2.0.0/16", "Backend":{"Type":"vxlan"}}'
             ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
       command: start
     - name: kubelet.service
@@ -339,7 +339,7 @@ write_files:
           - /hyperkube
           - proxy
           - --master=http://127.0.0.1:8080
-          - --cluster-cidr=192.168.0.0/16
+          - --cluster-cidr=10.2.0.0/16
           - --conntrack-max-per-core=0
           securityContext:
             privileged: true
