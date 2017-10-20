@@ -12,9 +12,6 @@ spec:
     image: calico/ctl:v1.6.1
     command: ["/bin/sh", "-c", "while true; do sleep 3600; done"]
     volumeMounts:
-      - name: config-volume
-        mountPath: /etc/config
-      # Mount in the etcd TLS secrets.
       - mountPath: /calico-secrets
         name: etcd-certs
     env:
@@ -39,12 +36,6 @@ spec:
           name: calico-config
           key: etcd_cert
   volumes:
-    - name: config-volume
-      configMap:
-        name: calico-config
-        items:
-        - key: ippool.yaml
-          path: calico/ippool.yaml
     # Mount in the etcd TLS secrets.
     - name: etcd-certs
       secret:
