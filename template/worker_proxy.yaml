@@ -233,17 +233,6 @@ write_files:
     content: |
       DOCKER_OPT_BIP=""
       DOCKER_OPT_IPMASQ=""
-  - path: "/etc/kubernetes/cni/net.d/10-flannel.conf"
-    permissions: "0644"
-    owner: "root"
-    content: |
-      {
-        "name": "podnet",
-        "type": "flannel",
-        "delegate": {
-          "isDefaultGateway": true
-        }
-      }
   - path: "/etc/flannel/options.env"
     permissions: "0644"
     owner: "root"
