@@ -79,7 +79,6 @@ coreos:
         --api-servers=http://127.0.0.1:8080 \
         --register-schedulable=false \
         --cni-conf-dir=/etc/kubernetes/cni/net.d \
-        --cni-bin-dir=/opt/cni/bin \
         --network-plugin=cni \
         --container-runtime=docker \
         --allow-privileged=true \

@@ -78,7 +78,6 @@ coreos:
         ExecStart=/usr/lib/coreos/kubelet-wrapper \
         --api-servers=https://MASTER_HOST_IP \
         --cni-conf-dir=/etc/kubernetes/cni/net.d \
-        --cni-bin-dir=/opt/cni/bin \
         --container-runtime=docker \
         --network-plugin=cni \
         --register-node=true \
