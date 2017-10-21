@@ -342,7 +342,7 @@ write_files:
           - /hyperkube
           - proxy
           - --master=http://127.0.0.1:8080
-          - --cluster-cidr=10.2.0.0/16
+          - --cluster-cidr=172.20.0.0/20
           - --conntrack-max-per-core=0
           securityContext:
             privileged: true

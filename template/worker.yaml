@@ -275,7 +275,7 @@ write_files:
           - /hyperkube
           - proxy
           - --master=https://MASTER_HOST_IP
-          - --cluster-cidr=10.2.0.0/16
+          - --cluster-cidr=172.20.0.0/20
           - --conntrack-max-per-core=0
           - --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml
           securityContext:
