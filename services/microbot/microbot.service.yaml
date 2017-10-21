@@ -2,6 +2,9 @@ kind: Service
 apiVersion: v1
 metadata:
   name: microbot 
+  namespace: microbot
+  labels: 
+    app: microbot
 spec:
   selector:
     app: microbot

@@ -2,6 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
  name: microbot-ingress
+ namespace: microbot
 spec:
  rules:
    - host: microbot

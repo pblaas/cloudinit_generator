@@ -2,6 +2,9 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: microbot-deployment
+  labels: 
+    app: microbot
+  namespace: microbot
 spec:
   replicas: 3
   template:
