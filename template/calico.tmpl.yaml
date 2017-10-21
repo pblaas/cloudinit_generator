@@ -128,7 +128,7 @@ spec:
             - name: CALICO_IPV4POOL_CIDR
               value: "192.168.50.0/20"
             - name: CALICO_IPV4POOL_IPIP
-              value: "always"
+              value: "cross-subnet"
             # Disable IPv6 on Kubernetes.
             - name: FELIX_IPV6SUPPORT
               value: "false"
