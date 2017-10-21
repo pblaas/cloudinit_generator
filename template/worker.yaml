@@ -37,25 +37,6 @@ coreos:
         Address=WORKER_IP
         Gateway=WORKER_GW
     - name: docker.service
-      drop-ins:
-        - name: 40-flannel.conf
-          content: |
-            [Unit]
-            Requires=flanneld.service
-            After=flanneld.service
-            [Service]
-            EnvironmentFile=/etc/kubernetes/cni/docker_opts_cni.env
-      command: start
-    - name: flanneld.service
-      drop-ins:
-        - name: 50-network-config.conf
-          content: |
-            [Unit]
-            Requires=etcd2.service
-            After=etcd2.service
-            [Service]
-            ExecStartPre=/usr/bin/etcdctl -cert-file=/etc/kubernetes/ssl/etcd-worker.pem --key-file=/etc/kubernetes/ssl/etcd-worker-key.pem --ca-file=/etc/kubernetes/ssl/etcd-ca.pem set /coreos.com/network/config '{ "Network": "10.2.0.0/16", "Backend":{"Type":"vxlan"}}'
-            ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
       command: start
     - name: kubelet.service
       content: |
