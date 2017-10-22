@@ -54,7 +54,7 @@ coreos:
             Requires=etcd2.service
             After=etcd2.service
             [Service]
-            ExecStartPre=/usr/bin/etcdctl -cert-file=/etc/kubernetes/ssl/etcd-worker.pem --key-file=/etc/kubernetes/ssl/etcd-worker-key.pem --ca-file=/etc/kubernetes/ssl/etcd-ca.pem set /coreos.com/network/config '{ "Network": "192.168.48.0/20", "Backend":{"Type":"vxlan"}}'
+            ExecStartPre=/usr/bin/etcdctl -cert-file=/etc/kubernetes/ssl/etcd-worker.pem --key-file=/etc/kubernetes/ssl/etcd-worker-key.pem --ca-file=/etc/kubernetes/ssl/etcd-ca.pem set /coreos.com/network/config '{ "Network": "10.244.0.0/16", "Backend":{"Type":"vxlan"}}'
             ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
       command: start
     - name: kubelet.service
@@ -81,6 +81,7 @@ coreos:
         ExecStart=/usr/lib/coreos/kubelet-wrapper \
         --api-servers=https://MASTER_HOST_IP \
         --cni-conf-dir=/etc/cni/net.d \
+        --cni-bin-dir=/opt/cni/bin \
         --container-runtime=docker \
         --network-plugin=cni \
         --register-node=true \
@@ -275,7 +276,7 @@ write_files:
           - /hyperkube
           - proxy
           - --master=https://MASTER_HOST_IP
-          - --cluster-cidr=192.168.48.0/20
+          - --cluster-cidr=10.244.0.0/16
           - --conntrack-max-per-core=0
           - --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml
           securityContext:

@@ -126,7 +126,7 @@ spec:
               value: "ACCEPT"
             # Configure the IP Pool from which Pod IPs will be chosen.
             - name: CALICO_IPV4POOL_CIDR
-              value: "192.168.48.0/20"
+              value: "10.244.0.0/16"
             - name: CALICO_IPV4POOL_IPIP
               value: "always"
             # Disable IPv6 on Kubernetes.
@@ -134,7 +134,7 @@ spec:
               value: "false"
             # Set Felix logging to "info"
             - name: FELIX_LOGSEVERITYSCREEN
-              value: "debug"
+              value: "DEBUG"
             # Set MTU for tunnel device used if ipip is enabled
             - name: FELIX_IPINIPMTU
               value: "1440"
