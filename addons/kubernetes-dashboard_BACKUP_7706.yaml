@@ -47,7 +47,11 @@ spec:
     spec:
       containers:
       - name: kubernetes-dashboard
+<<<<<<< HEAD
         image: gcr.io/google_containers/kubernetes-dashboard-amd64:v1.7.1
+=======
+        image: gcr.io/google_containers/kubernetes-dashboard-amd64:v1.7.0
+>>>>>>> feature/migration_apiserver_kubeconfig
         imagePullPolicy: Always
         ports:
         - containerPort: 9090
