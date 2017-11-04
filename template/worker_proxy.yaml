@@ -69,11 +69,18 @@ coreos:
         --mount volume=dns,target=/etc/resolv.conf \
         --volume var-log,kind=host,source=/var/log \
         --mount volume=var-log,target=/var/log \
-        --hosts-entry=host"
+        --volume cni-net,kind=host,source=/etc/cni/net.d \
+        --mount volume=cni-net,target=/etc/cni/net.d \
+        --volume cni-bin,kind=host,source=/opt/cni/bin \
+        --mount volume=cni-bin,target=/opt/cni/bin \
+        --host-entry=host"
         ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
         ExecStartPre=/usr/bin/mkdir -p /var/log/containers
         ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
+        ExecStartPre=/usr/bin/mkdir -p /opt/cni/bin
+        ExecStartPre=/usr/bin/mkdir -p /etc/cni/net.d
         ExecStart=/usr/lib/coreos/kubelet-wrapper \
+        --api-servers=https://MASTER_HOST_IP \
         --cni-conf-dir=/etc/kubernetes/cni/net.d \
         --container-runtime=docker \
         --network-plugin=cni \
@@ -270,7 +277,7 @@ write_files:
           - /hyperkube
           - proxy
           - --master=https://MASTER_HOST_IP
-          - --cluster-cidr=10.2.0.0/16
+          - --cluster-cidr=10.244.0.0/16
           - --conntrack-max-per-core=0
           - --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml
           securityContext:

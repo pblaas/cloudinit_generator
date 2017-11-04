@@ -1,0 +1,42 @@
+# kubectl exec -ti -n kube-system calicoctl -- /calicoctl get profiles -o wide
+#
+apiVersion: v1
+kind: Pod
+metadata:
+  name: calicoctl
+  namespace: kube-system
+spec:
+  hostNetwork: true
+  containers:
+  - name: calicoctl
+    image: calico/ctl:v1.6.1
+    command: ["/bin/sh", "-c", "while true; do sleep 3600; done"]
+    volumeMounts:
+      - mountPath: /calico-secrets
+        name: etcd-certs
+    env:
+    - name: ETCD_ENDPOINTS
+      valueFrom:
+        configMapKeyRef:
+          name: calico-config
+          key: etcd_endpoints
+    - name: ETCD_CA_CERT_FILE
+      valueFrom:
+        configMapKeyRef:
+          name: calico-config
+          key: etcd_ca
+    - name: ETCD_KEY_FILE
+      valueFrom:
+        configMapKeyRef:
+          name: calico-config
+          key: etcd_key
+    - name: ETCD_CERT_FILE
+      valueFrom:
+        configMapKeyRef:
+          name: calico-config
+          key: etcd_cert
+  volumes:
+    # Mount in the etcd TLS secrets.
+    - name: etcd-certs
+      secret:
+        secretName: calico-etcd-secrets
