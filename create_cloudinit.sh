@@ -139,6 +139,16 @@ echo CLOUDCONF:$CLOUDCONF >> index.txt
 #convert ssh public key to base64 gzip.
 UCK1=`echo $USER_CORE_KEY1 | gzip | base64 -w0`
 
+if [ $NET_OVERLAY == "calico" ]; then
+	NETOVERLAY_MOUNTS="--volume cni-net,kind=host,source=/etc/cni/net.d \\\\\n        --mount volume=cni-net,target=/etc/cni/net.d \\\\\n        --volume cni-bin,kind=host,source=/opt/cni/bin \\\\\n        --mount volume=cni-bin,target=/opt/cni/bin \\\\"
+	NETOVERLAY_DIRS="ExecStartPre=/usr/bin/mkdir -p /opt/cni/bin\n        ExecStartPre=/usr/bin/mkdir -p /etc/cni/net.d"
+	NETOVERLAY_CNICONF="--cni-conf-dir=/etc/cni/net.d \\\\\n        --cni-bin-dir=/opt/cni/bin \\\\"
+else
+	NETOVERLAY_CNICONF="--cni-conf-dir=/etc/kubernetes/cni/net.d \\\\"
+	NETOVERLAY_MOUNTS="\\\\"
+	NETOVERLAY_DIRS="\\\\"
+fi
+
 #generate the master.yaml from the controller.yaml template
 sed -e "s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g" \
 -e "s,MASTER_HOST_IP,$MASTER_HOST_IP,g" \
@@ -161,6 +171,9 @@ sed -e "s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g" \
 -e "s,\<ETCDAPISERVER\>,$ETCDAPISERVER,g" \
 -e "s,CLOUDCONF,$CLOUDCONF,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
+-e "s@NETOVERLAY_MOUNTS@${NETOVERLAY_MOUNTS}@g" \
+-e "s@NETOVERLAY_DIRS@${NETOVERLAY_DIRS}@g" \
+-e "s@NETOVERLAY_CNICONF@${NETOVERLAY_CNICONF}@g" \
 ../template/controller.yaml > node_$MASTER_HOST_IP.yaml
 echo ----------------------
 echo Generated: Master: node_$MASTER_HOST_IP.yaml
@@ -188,6 +201,9 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,\<ETCDWORKER\>,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
 -e "s,CLOUDCONF,$CLOUDCONF,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
+-e "s@NETOVERLAY_MOUNTS@${NETOVERLAY_MOUNTS}@g" \
+-e "s@NETOVERLAY_DIRS@${NETOVERLAY_DIRS}@g" \
+-e "s@NETOVERLAY_CNICONF@${NETOVERLAY_CNICONF}@g" \
 ../template/worker.yaml > node_$i.yaml
 echo Generated: Worker: node_$i.yaml
 done

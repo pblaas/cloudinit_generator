@@ -57,6 +57,17 @@ for i in $1; do
 	echo ETCDWORKER_$i:$ETCDWORKER >> index.txt
 done
 
+if [ $NET_OVERLAY == "calico" ]; then
+        NETOVERLAY_MOUNTS="--volume cni-net,kind=host,source=/etc/cni/net.d \\\\\n        --mount volume=cni-net,target=/etc/cni/net.d \\\\\n        --volume cni-bin,kind=host,source=/opt/cni/bin \\\\\n        --mount volume=cni-bin,target=/opt/cni/bin \\\\"
+        NETOVERLAY_DIRS="ExecStartPre=/usr/bin/mkdir -p /opt/cni/bin\n        ExecStartPre=/usr/bin/mkdir -p /etc/cni/net.d"
+        NETOVERLAY_CNICONF="--cni-conf-dir=/etc/cni/net.d \\\\\n        --cni-bin-dir=/opt/cni/bin \\\\"
+else
+        NETOVERLAY_CNICONF="--cni-conf-dir=/etc/kubernetes/cni/net.d \\\\"
+        NETOVERLAY_MOUNTS="\\\\"
+        NETOVERLAY_DIRS="\\\\"
+fi
+
+
 #genereate the worker yamls from the worker.yaml template
 for i in $1; do
 sed -e "s,WORKER_IP,$i,g" \
@@ -79,6 +90,9 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,\<ETCDWORKER\>,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
 -e "s,CLOUDCONF,`cat index.txt|grep -w CLOUDCONF|cut -d: -f2`,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
+-e "s@NETOVERLAY_MOUNTS@${NETOVERLAY_MOUNTS}@g" \
+-e "s@NETOVERLAY_DIRS@${NETOVERLAY_DIRS}@g" \
+-e "s@NETOVERLAY_CNICONF@${NETOVERLAY_CNICONF}@g" \
 ../template/worker_proxy.yaml > node_$i.yaml
 echo Generated: node_$i.yaml
 done
