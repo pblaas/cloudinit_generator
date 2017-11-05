@@ -145,8 +145,8 @@ if [ $NET_OVERLAY == "calico" ]; then
 	NETOVERLAY_CNICONF="--cni-conf-dir=/etc/cni/net.d \\\\\n        --cni-bin-dir=/opt/cni/bin \\\\"
 else
 	NETOVERLAY_CNICONF="--cni-conf-dir=/etc/kubernetes/cni/net.d \\\\"
-	NETOVERLAY_MOUNTS=""
-	NETOVERLAY_DIRS=""
+	NETOVERLAY_MOUNTS="\\\\"
+	NETOVERLAY_DIRS="\\\\"
 fi
 
 #generate the master.yaml from the controller.yaml template
