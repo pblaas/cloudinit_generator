@@ -74,7 +74,6 @@ coreos:
         ExecStartPre=/usr/bin/mkdir -p /var/log/containers
         ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
         ExecStart=/usr/lib/coreos/kubelet-wrapper \
-        --api-servers=https://MASTER_HOST_IP \
         --cni-conf-dir=/etc/kubernetes/cni/net.d \
         --container-runtime=docker \
         --network-plugin=cni \
