@@ -90,6 +90,9 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,\<ETCDWORKER\>,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
 -e "s,CLOUDCONF,`cat index.txt|grep -w CLOUDCONF|cut -d: -f2`,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
+-e "s@NETOVERLAY_MOUNTS@${NETOVERLAY_MOUNTS}@g" \
+-e "s@NETOVERLAY_DIRS@${NETOVERLAY_DIRS}@g" \
+-e "s@NETOVERLAY_CNICONF@${NETOVERLAY_CNICONF}@g" \
 ../template/worker_proxy.yaml > node_$i.yaml
 echo Generated: node_$i.yaml
 done
