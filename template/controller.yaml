@@ -404,31 +404,19 @@ write_files:
             initialDelaySeconds: 15
             timeoutSeconds: 15
           volumeMounts:
-          - mountPath: /etc/kubernetes/ssl
-            name: ssl-certs-kubernetes
-            readOnly: true
-          - mountPath: /etc/ssl/certs
-            name: ssl-certs-host
-            readOnly: true
           - mountPath: /etc/kubernetes/master-kubeconfig.yaml
-            name: "kubeconfig"
+            name: kubeconfig
             readOnly: true
           - mountPath: /etc/kubernetes/ssl
-            name: "etc-kube-ssl"
+            name: etc-kube-ssl
             readOnly: true
         volumes:
-        - hostPath:
+        - name: kubeconfig
+          hostPath:
+            path: /etc/kubernetes/master-kubeconfig.yaml
+        - name: etc-kube-ssl
+          hostPath:
             path: /etc/kubernetes/ssl
-          name: ssl-certs-kubernetes
-        - hostPath:
-            path: /usr/share/ca-certificates
-          name: ssl-certs-host
-        - name: "kubeconfig"
-          hostPath:
-            path: "/etc/kubernetes/master-kubeconfig.yaml"
-        - name: "etc-kube-ssl"
-          hostPath:
-            path: "/etc/kubernetes/ssl"
   - path: "/etc/kubernetes/manifests/kube-scheduler.yaml"
     permissions: "0644"
     owner: "root"
