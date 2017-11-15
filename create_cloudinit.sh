@@ -139,6 +139,12 @@ echo CLOUDCONF:$CLOUDCONF >> index.txt
 #convert ssh public key to base64 gzip.
 UCK1=`echo $USER_CORE_KEY1 | gzip | base64 -w0`
 
+if [ $AUTHORIZATION_MODE == "RBAC" ]; then
+	AUTHORIZATION_MODE="--authorization-mode=RBAC \\\\"
+else
+	AUTHORIZATION_MODE="\\\\"
+fi
+
 if [ $NET_OVERLAY == "calico" ]; then
 	NETOVERLAY_MOUNTS="--volume cni-net,kind=host,source=/etc/cni/net.d \\\\\n        --mount volume=cni-net,target=/etc/cni/net.d \\\\\n        --volume cni-bin,kind=host,source=/opt/cni/bin \\\\\n        --mount volume=cni-bin,target=/opt/cni/bin \\\\"
 	NETOVERLAY_DIRS="ExecStartPre=/usr/bin/mkdir -p /opt/cni/bin\n        ExecStartPre=/usr/bin/mkdir -p /etc/cni/net.d"
@@ -171,6 +177,7 @@ sed -e "s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g" \
 -e "s,\<ETCDAPISERVER\>,$ETCDAPISERVER,g" \
 -e "s,CLOUDCONF,$CLOUDCONF,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
+-e "s@AUTHORIZATION_MODE@${AUTHORIZATION_MODE}@g" \
 -e "s@NETOVERLAY_MOUNTS@${NETOVERLAY_MOUNTS}@g" \
 -e "s@NETOVERLAY_DIRS@${NETOVERLAY_DIRS}@g" \
 -e "s@NETOVERLAY_CNICONF@${NETOVERLAY_CNICONF}@g" \
