@@ -48,7 +48,7 @@ sed -e s/K8S_SERVICE_IP/$K8S_SERVICE_IP/ -e s/MASTER_HOST_IP/$MASTER_HOST_IP/ -e
 
 #create API certs
 openssl genrsa -out apiserver-key.pem 2048
-openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=kube-apiserver" -config openssl.cnf
+openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=system:node:kubelet" -config openssl.cnf
 openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out apiserver.pem -days 365 -extensions v3_req -extfile openssl.cnf
 
 #create ETCD-API-certs
@@ -59,7 +59,7 @@ openssl x509 -req -in etcd-apiserver.csr -CA etcd-ca.pem -CAkey etcd-ca-key.pem 
 #create worker certs
 for i in ${WORKER_HOSTS[@]}; do
 openssl genrsa -out ${i}-worker-key.pem 2048
-WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=${i}" -config ../template/worker-openssl.cnf
+WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=system:node:kubelet" -config ../template/worker-openssl.cnf
 WORKER_IP=${i} openssl x509 -req -in ${i}-worker.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out ${i}-worker.pem -days 365 -extensions v3_req -extfile ../template/worker-openssl.cnf
 done
 
@@ -73,12 +73,12 @@ done
 
 #create admin certs
 openssl genrsa -out admin-key.pem 2048
-openssl req -new -key admin-key.pem -out admin.csr -subj "/CN=kube-admin"
+openssl req -new -key admin-key.pem -out admin.csr -subj "/CN=cluster-admin:kubeadmin"
 openssl x509 -req -in admin.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out admin.pem -days 365
 
 #create demouser certs
 openssl genrsa -out demouser-key.pem 2048
-openssl req -new -key demouser-key.pem -out demouser.csr -subj "/CN=demouser"
+openssl req -new -key demouser-key.pem -out demouser.csr -subj "/CN=cluster-admin:demouser"
 openssl x509 -req -in demouser.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out demouser.pem -days 365
 
 # encode to base64 gzip files.
