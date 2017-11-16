@@ -73,12 +73,12 @@ done
 
 #create admin certs
 openssl genrsa -out admin-key.pem 2048
-openssl req -new -key admin-key.pem -out admin.csr -subj "/CN=cluster-admin:kubeadmin"
+openssl req -new -key admin-key.pem -out admin.csr -subj "/O=cluster-admin CN=kube-admin"
 openssl x509 -req -in admin.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out admin.pem -days 365
 
 #create demouser certs
 openssl genrsa -out demouser-key.pem 2048
-openssl req -new -key demouser-key.pem -out demouser.csr -subj "/CN=cluster-admin:demouser"
+openssl req -new -key demouser-key.pem -out demouser.csr -subj "/O=cluster-admin CN=demouser"
 openssl x509 -req -in demouser.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out demouser.pem -days 365
 
 # encode to base64 gzip files.
