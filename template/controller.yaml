@@ -293,6 +293,7 @@ write_files:
           - --kubelet-client-key=/etc/kubernetes/ssl/apiserver-key.pem
           - --anonymous-auth=false
           - --authorization-mode=AUTHORIZATION_MODE
+          - --v=4
           - --cloud-provider=CLOUD_PROVIDER
           - --cloud-config=/etc/kubernetes/ssl/cloud.conf
           livenessProbe:
