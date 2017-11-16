@@ -283,7 +283,7 @@ write_files:
           - --service-cluster-ip-range=SERVICE_CLUSTER_IP_RANGE
           - --secure-port=443
           - --advertise-address=MASTER_HOST_IP
-          - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota,NodeRestriction
+          - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota
           - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
           - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
           - --client-ca-file=/etc/kubernetes/ssl/ca.pem
@@ -292,7 +292,7 @@ write_files:
           - --kubelet-client-certificate=/etc/kubernetes/ssl/apiserver.pem
           - --kubelet-client-key=/etc/kubernetes/ssl/apiserver-key.pem
           - --anonymous-auth=false
-          - --authorization-mode=Node,AUTHORIZATION_MODE
+          - --authorization-mode=AUTHORIZATION_MODE
           - --v=4
           - --cloud-provider=CLOUD_PROVIDER
           - --cloud-config=/etc/kubernetes/ssl/cloud.conf
