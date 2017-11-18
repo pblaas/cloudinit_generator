@@ -53,7 +53,7 @@ if [ "$CLOUD_PROVIDER" == "openstack" ]; then
 else
 	CERTID=${MASTER_HOST_IP}
 fi
-openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=system:node:k8s-${CERTID}/O=system:nodes" -config openssl.cnf
+openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=system:node:${CERTID}/O=system:nodes" -config openssl.cnf
 openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out apiserver.pem -days 365 -extensions v3_req -extfile openssl.cnf
 
 #create ETCD-API-certs
@@ -69,7 +69,7 @@ if [ "$CLOUD_PROVIDER" == "openstack" ]; then
 else
 	CERTID=${i}
 fi
-WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=system:node:k8s-${CLUSTERNAME}-node${i##*.}/O=system:nodes" -config ../template/worker-openssl.cnf
+WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=system:node:${CERTID}/O=system:nodes" -config ../template/worker-openssl.cnf
 WORKER_IP=${i} openssl x509 -req -in ${i}-worker.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out ${i}-worker.pem -days 365 -extensions v3_req -extfile ../template/worker-openssl.cnf
 done
 
