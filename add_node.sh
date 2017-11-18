@@ -25,7 +25,12 @@ HASHED_USER_CORE_PASSWORD=$(perl -le "print crypt '$USER_CORE_PASSWORD', '\$6\$$
 #create worker certs
 for i in $1; do
 openssl genrsa -out ${i}-worker-key.pem 2048
-WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=${i}" -config ../template/worker-openssl.cnf
+if [ "$CLOUD_PROVIDER" == "openstack" ]; then
+	CERTID=k8s-${CLUSTERNAME}-node${i##*.}
+else
+	CERTID=${i}
+fi
+WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=system:node:${CERTID}/O=system:nodes" -config ../template/worker-openssl.cnf
 WORKER_IP=${i} openssl x509 -req -in ${i}-worker.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out ${i}-worker.pem -days 365 -extensions v3_req -extfile ../template/worker-openssl.cnf
 done
 
