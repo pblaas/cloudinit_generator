@@ -54,7 +54,7 @@ coreos:
             Requires=etcd2.service
             After=etcd2.service
             [Service]
-            ExecStartPre=/usr/bin/etcdctl --cert-file=/etc/kubernetes/ssl/etcd-apiserver.pem --key-file=/etc/kubernetes/ssl/etcd-apiserver-key.pem --ca-file=/etc/kubernetes/ssl/etcd-ca.pem set /coreos.com/network/config '{ "Network": "10.2.0.0/16", "Backend":{"Type":"vxlan"}}'
+            ExecStartPre=/usr/bin/etcdctl --cert-file=/etc/kubernetes/ssl/etcd-apiserver.pem --key-file=/etc/kubernetes/ssl/etcd-apiserver-key.pem --ca-file=/etc/kubernetes/ssl/etcd-ca.pem set /coreos.com/network/config '{ "Network": "10.244.0.0/16", "Backend":{"Type":"vxlan"}}'
             ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
       command: start
     - name: kubelet.service
@@ -69,15 +69,17 @@ coreos:
         --mount volume=var-log,target=/var/log \
         --volume dns,kind=host,source=/etc/resolv.conf \
         --mount volume=dns,target=/etc/resolv.conf \
+        NETOVERLAY_MOUNTS
         --hosts-entry=host"
         ExecStartPre=/usr/bin/mkdir -p /etc/kubernetes/manifests
         ExecStartPre=/usr/bin/mkdir -p /var/log/containers
         ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/run/kubelet-pod.uuid
+        NETOVERLAY_DIRS
         ExecStart=/usr/lib/coreos/kubelet-wrapper \
         --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml \
         --require-kubeconfig \
         --register-schedulable=false \
-        --cni-conf-dir=/etc/kubernetes/cni/net.d \
+        NETOVERLAY_CNICONF
         --network-plugin=cni \
         --container-runtime=docker \
         --allow-privileged=true \
@@ -281,7 +283,7 @@ write_files:
           - --service-cluster-ip-range=SERVICE_CLUSTER_IP_RANGE
           - --secure-port=443
           - --advertise-address=MASTER_HOST_IP
-          - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota
+          - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota,NodeRestriction
           - --tls-cert-file=/etc/kubernetes/ssl/apiserver.pem
           - --tls-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
           - --client-ca-file=/etc/kubernetes/ssl/ca.pem
@@ -290,6 +292,8 @@ write_files:
           - --kubelet-client-certificate=/etc/kubernetes/ssl/apiserver.pem
           - --kubelet-client-key=/etc/kubernetes/ssl/apiserver-key.pem
           - --anonymous-auth=false
+          - --authorization-mode=AUTHORIZATION_MODE
+          - --v=4
           - --cloud-provider=CLOUD_PROVIDER
           - --cloud-config=/etc/kubernetes/ssl/cloud.conf
           livenessProbe:
@@ -338,7 +342,7 @@ write_files:
           - /hyperkube
           - proxy
           - --master=http://127.0.0.1:8080
-          - --cluster-cidr=10.2.0.0/16
+          - --cluster-cidr=10.244.0.0/16
           - --conntrack-max-per-core=0
           - --kubeconfig=/etc/kubernetes/master-kubeconfig.yaml
           securityContext:
@@ -398,25 +402,19 @@ write_files:
             initialDelaySeconds: 15
             timeoutSeconds: 15
           volumeMounts:
-          - mountPath: /etc/ssl/certs
-            name: ssl-certs-host
-            readOnly: true
           - mountPath: /etc/kubernetes/master-kubeconfig.yaml
-            name: "kubeconfig"
+            name: kubeconfig
             readOnly: true
           - mountPath: /etc/kubernetes/ssl
-            name: "etc-kube-ssl"
+            name: etc-kube-ssl
             readOnly: true
         volumes:
-        - hostPath:
-            path: /usr/share/ca-certificates
-          name: ssl-certs-host
-        - name: "kubeconfig"
+        - name: kubeconfig
           hostPath:
-            path: "/etc/kubernetes/master-kubeconfig.yaml"
-        - name: "etc-kube-ssl"
+            path: /etc/kubernetes/master-kubeconfig.yaml
+        - name: etc-kube-ssl
           hostPath:
-            path: "/etc/kubernetes/ssl"
+            path: /etc/kubernetes/ssl
   - path: "/etc/kubernetes/manifests/kube-scheduler.yaml"
     permissions: "0644"
     owner: "root"

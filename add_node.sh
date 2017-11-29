@@ -25,7 +25,12 @@ HASHED_USER_CORE_PASSWORD=$(perl -le "print crypt '$USER_CORE_PASSWORD', '\$6\$$
 #create worker certs
 for i in $1; do
 openssl genrsa -out ${i}-worker-key.pem 2048
-WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=${i}" -config ../template/worker-openssl.cnf
+if [ "$CLOUD_PROVIDER" == "openstack" ]; then
+	CERTID=k8s-${CLUSTERNAME}-node${i##*.}
+else
+	CERTID=${i}
+fi
+WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=system:node:${CERTID}/O=system:nodes" -config ../template/worker-openssl.cnf
 WORKER_IP=${i} openssl x509 -req -in ${i}-worker.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out ${i}-worker.pem -days 365 -extensions v3_req -extfile ../template/worker-openssl.cnf
 done
 
@@ -55,8 +60,18 @@ for i in $1; do
 	echo WORKER_$i:$WORKER >> index.txt
 	echo ETCDWORKERKEY_$i:$ETCDWORKERKEY >> index.txt
 	echo ETCDWORKER_$i:$ETCDWORKER >> index.txt
-
 done
+
+if [ $NET_OVERLAY == "calico" ]; then
+        NETOVERLAY_MOUNTS="--volume cni-net,kind=host,source=/etc/cni/net.d \\\\\n        --mount volume=cni-net,target=/etc/cni/net.d \\\\\n        --volume cni-bin,kind=host,source=/opt/cni/bin \\\\\n        --mount volume=cni-bin,target=/opt/cni/bin \\\\"
+        NETOVERLAY_DIRS="ExecStartPre=/usr/bin/mkdir -p /opt/cni/bin\n        ExecStartPre=/usr/bin/mkdir -p /etc/cni/net.d"
+        NETOVERLAY_CNICONF="--cni-conf-dir=/etc/cni/net.d \\\\\n        --cni-bin-dir=/opt/cni/bin \\\\"
+else
+        NETOVERLAY_CNICONF="--cni-conf-dir=/etc/kubernetes/cni/net.d \\\\"
+        NETOVERLAY_MOUNTS="\\\\"
+        NETOVERLAY_DIRS="\\\\"
+fi
+
 
 #genereate the worker yamls from the worker.yaml template
 for i in $1; do
@@ -75,11 +90,14 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,\<CACERT\>,$CACERT,g" \
 -e "s,\<WORKERKEY\>,`cat index.txt|grep -w WORKERKEY_$i|cut -d: -f2`,g" \
 -e "s,\<WORKER\>,`cat index.txt|grep -w WORKER_$i|cut -d: -f2`,g" \
--e "s,ETCDCACERT,`cat index.txt|grep -w ETCDCACERT|cut -d: -f2`,g" \
--e "s,ETCDWORKERKEY,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
--e "s,ETCDWORKER,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDCACERT\>,`cat index.txt|grep -w ETCDCACERT|cut -d: -f2`,g" \
+-e "s,\<ETCDWORKERKEY\>,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDWORKER\>,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
 -e "s,CLOUDCONF,`cat index.txt|grep -w CLOUDCONF|cut -d: -f2`,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
+-e "s@NETOVERLAY_MOUNTS@${NETOVERLAY_MOUNTS}@g" \
+-e "s@NETOVERLAY_DIRS@${NETOVERLAY_DIRS}@g" \
+-e "s@NETOVERLAY_CNICONF@${NETOVERLAY_CNICONF}@g" \
 ../template/worker_proxy.yaml > node_$i.yaml
 echo Generated: node_$i.yaml
 done

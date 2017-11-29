@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    name: microbot
+  name: microbot
+
+---
+
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: microbot-deployment
+  labels: 
+    app: microbot
+  namespace: microbot
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: microbot
+    spec:
+      containers:
+      - name: microbot 
+        image: dontrebootme/microbot:v1
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "64Mi"
+          limits:
+            cpu: "200m"
+            memory: "128Mi"
+        ports:
+        - containerPort: 80
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: microbot 
+  namespace: microbot
+  labels: 
+    app: microbot
+spec:
+  selector:
+    app: microbot
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: microbot-ingress
+ namespace: microbot
+spec:
+ rules:
+   - host: microbot
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: microbot
+             servicePort: 80
