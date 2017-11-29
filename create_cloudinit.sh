@@ -48,7 +48,12 @@ sed -e s/K8S_SERVICE_IP/$K8S_SERVICE_IP/ -e s/MASTER_HOST_IP/$MASTER_HOST_IP/ -e
 
 #create API certs
 openssl genrsa -out apiserver-key.pem 2048
-openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=kube-apiserver" -config openssl.cnf
+if [ "$CLOUD_PROVIDER" == "openstack" ]; then
+	CERTID=k8s-${CLUSTERNAME}-node${MASTER_HOST_IP##*.}
+else
+	CERTID=${MASTER_HOST_IP}
+fi
+openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=system:node:${CERTID}/O=system:nodes" -config openssl.cnf
 openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out apiserver.pem -days 365 -extensions v3_req -extfile openssl.cnf
 
 #create ETCD-API-certs
@@ -59,7 +64,12 @@ openssl x509 -req -in etcd-apiserver.csr -CA etcd-ca.pem -CAkey etcd-ca-key.pem 
 #create worker certs
 for i in ${WORKER_HOSTS[@]}; do
 openssl genrsa -out ${i}-worker-key.pem 2048
-WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=${i}" -config ../template/worker-openssl.cnf
+if [ "$CLOUD_PROVIDER" == "openstack" ]; then
+	CERTID=k8s-${CLUSTERNAME}-node${i##*.}
+else
+	CERTID=${i}
+fi
+WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=system:node:${CERTID}/O=system:nodes" -config ../template/worker-openssl.cnf
 WORKER_IP=${i} openssl x509 -req -in ${i}-worker.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out ${i}-worker.pem -days 365 -extensions v3_req -extfile ../template/worker-openssl.cnf
 done
 
@@ -73,12 +83,12 @@ done
 
 #create admin certs
 openssl genrsa -out admin-key.pem 2048
-openssl req -new -key admin-key.pem -out admin.csr -subj "/CN=kube-admin"
+openssl req -new -key admin-key.pem -out admin.csr -subj "/CN=kube-admin/O=system:masters"
 openssl x509 -req -in admin.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out admin.pem -days 365
 
 #create demouser certs
 openssl genrsa -out demouser-key.pem 2048
-openssl req -new -key demouser-key.pem -out demouser.csr -subj "/CN=demouser"
+openssl req -new -key demouser-key.pem -out demouser.csr -subj "/CN=demouser/O=demonamespace"
 openssl x509 -req -in demouser.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out demouser.pem -days 365
 
 # encode to base64 gzip files.
@@ -171,6 +181,7 @@ sed -e "s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g" \
 -e "s,\<ETCDAPISERVER\>,$ETCDAPISERVER,g" \
 -e "s,CLOUDCONF,$CLOUDCONF,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
+-e "s@AUTHORIZATION_MODE@${AUTHORIZATION_MODE}@g" \
 -e "s@NETOVERLAY_MOUNTS@${NETOVERLAY_MOUNTS}@g" \
 -e "s@NETOVERLAY_DIRS@${NETOVERLAY_DIRS}@g" \
 -e "s@NETOVERLAY_CNICONF@${NETOVERLAY_CNICONF}@g" \
