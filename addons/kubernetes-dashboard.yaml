@@ -16,6 +16,14 @@
 #
 # Example usage: kubectl create -f <this_file>
 
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kube-system
+---
 kind: Deployment
 apiVersion: extensions/v1beta1
 metadata:
@@ -45,6 +53,12 @@ spec:
             }
           ]
     spec:
+      initContainers:
+      - name: kubernetes-dashboard-init
+        image: gcr.io/google_containers/kubernetes-dashboard-init-amd64:v1.0.0
+        volumeMounts:
+        - name: kubernetes-dashboard-certs
+          mountPath: /certs
       containers:
       - name: kubernetes-dashboard
         image: gcr.io/google_containers/kubernetes-dashboard-amd64:v1.7.1
@@ -53,16 +67,42 @@ spec:
         - containerPort: 9090
           protocol: TCP
         args:
+          - --tls-key-file=/certs/dashboard.key
+          - --tls-cert-file=/certs/dashboard.crt
           # Uncomment the following line to manually specify Kubernetes API server Host
           # If not specified, Dashboard will attempt to auto discover the API server and connect
           # to it. Uncomment only if the default does not work.
           # - --apiserver-host=http://my-address:port
+        volumeMounts:
+        - name: kubernetes-dashboard-certs
+          mountPath: /certs
+          readOnly: true
+          # Create on-disk volume to store exec logs
+        - mountPath: /tmp
+          name: tmp-volume
         livenessProbe:
           httpGet:
+            scheme: HTTPS
             path: /
-            port: 9090
+            port: 8443
           initialDelaySeconds: 30
           timeoutSeconds: 30
+      volumes:
+      - name: kubernetes-dashboard-certs
+        secret:
+          secretName: kubernetes-dashboard-certs
+      - name: tmp-volume
+        emptyDir: {}
+      serviceAccountName: kubernetes-dashboard
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app: kubernetes-dashboard
+  name: kubernetes-dashboard-certs
+  namespace: kube-system
+type: Opaque
 ---
 kind: Service
 apiVersion: v1
@@ -74,7 +114,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 80
-    targetPort: 9090
+    - port: 443
+      targetPort: 8443
   selector:
     app: kubernetes-dashboard

@@ -36,14 +36,14 @@ kubectl create -f addons/dns-addon.yaml
 ```
 kubectl create -f addons/kubernetes-dashboard.yaml
 kubectl proxy
-http://localhost:8001/ui
+http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/
 ```
 3. Heapster && Influx && Grafana
   ```
   kubectl create -f addons/grafana-deployment.yaml
   kubectl create -f addons/grafana-service.yaml
   kubectl create -f addons/heapster-deployment.yaml
-  kubectl create -f addons/heapster-service.yam
+  kubectl create -f addons/heapster-service.yaml
   kubectl create -f addons/influxdb-deployment.yaml
   kubectl create -f addons/influxdb-service.yaml
   ```
