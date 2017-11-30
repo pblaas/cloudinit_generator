@@ -43,7 +43,7 @@ http://localhost:8001/ui
   kubectl create -f addons/grafana-deployment.yaml
   kubectl create -f addons/grafana-service.yaml
   kubectl create -f addons/heapster-deployment.yaml
-  kubectl create -f addons/heapster-service.yam
+  kubectl create -f addons/heapster-service.yaml
   kubectl create -f addons/influxdb-deployment.yaml
   kubectl create -f addons/influxdb-service.yaml
   ```
