@@ -48,7 +48,12 @@ sed -e s/K8S_SERVICE_IP/$K8S_SERVICE_IP/ -e s/MASTER_HOST_IP/$MASTER_HOST_IP/ -e
 
 #create API certs
 openssl genrsa -out apiserver-key.pem 2048
-openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=kube-apiserver" -config openssl.cnf
+if [ "$CLOUD_PROVIDER" == "openstack" ]; then
+	CERTID=k8s-${CLUSTERNAME}-node${MASTER_HOST_IP##*.}
+else
+	CERTID=${MASTER_HOST_IP}
+fi
+openssl req -new -key apiserver-key.pem -out apiserver.csr -subj "/CN=system:node:${CERTID}/O=system:nodes" -config openssl.cnf
 openssl x509 -req -in apiserver.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out apiserver.pem -days 365 -extensions v3_req -extfile openssl.cnf
 
 #create ETCD-API-certs
@@ -59,7 +64,12 @@ openssl x509 -req -in etcd-apiserver.csr -CA etcd-ca.pem -CAkey etcd-ca-key.pem 
 #create worker certs
 for i in ${WORKER_HOSTS[@]}; do
 openssl genrsa -out ${i}-worker-key.pem 2048
-WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=${i}" -config ../template/worker-openssl.cnf
+if [ "$CLOUD_PROVIDER" == "openstack" ]; then
+	CERTID=k8s-${CLUSTERNAME}-node${i##*.}
+else
+	CERTID=${i}
+fi
+WORKER_IP=${i} openssl req -new -key ${i}-worker-key.pem -out ${i}-worker.csr -subj "/CN=system:node:${CERTID}/O=system:nodes" -config ../template/worker-openssl.cnf
 WORKER_IP=${i} openssl x509 -req -in ${i}-worker.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out ${i}-worker.pem -days 365 -extensions v3_req -extfile ../template/worker-openssl.cnf
 done
 
@@ -73,12 +83,12 @@ done
 
 #create admin certs
 openssl genrsa -out admin-key.pem 2048
-openssl req -new -key admin-key.pem -out admin.csr -subj "/CN=kube-admin"
+openssl req -new -key admin-key.pem -out admin.csr -subj "/CN=kube-admin/O=system:masters"
 openssl x509 -req -in admin.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out admin.pem -days 365
 
 #create demouser certs
 openssl genrsa -out demouser-key.pem 2048
-openssl req -new -key demouser-key.pem -out demouser.csr -subj "/CN=demouser"
+openssl req -new -key demouser-key.pem -out demouser.csr -subj "/CN=demouser/O=demonamespace"
 openssl x509 -req -in demouser.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out demouser.pem -days 365
 
 # encode to base64 gzip files.
@@ -91,11 +101,15 @@ CAKEY=$(cat ca-key.pem | gzip | base64 -w0)
 CACERT=$(cat ca.pem | gzip | base64 -w0)
 ETCDCAKEY=$(cat etcd-ca-key.pem | gzip | base64 -w0)
 ETCDCACERT=$(cat etcd-ca.pem | gzip | base64 -w0)
+ETCDCACERT_BASE64=$(cat etcd-ca.pem | base64 -w0)
 APISERVERKEY=$(cat apiserver-key.pem | gzip | base64 -w0)
 APISERVER=$(cat apiserver.pem | gzip | base64 -w0)
 ETCDAPISERVERKEY=$(cat etcd-apiserver-key.pem | gzip | base64 -w0)
 ETCDAPISERVER=$(cat etcd-apiserver.pem | gzip | base64 -w0)
 
+ETCDCACERTBASE64=$(cat etcd-ca.pem | base64 -w0)
+ETCDAPISERVERKEYBASE64=$(cat etcd-apiserver-key.pem | base64 -w0)
+ETCDAPISERVERBASE64=$(cat etcd-apiserver.pem | base64 -w0)
 
 for i in ${WORKER_HOSTS[@]}; do
 	j=$i-worker-key.pem
@@ -106,10 +120,14 @@ for i in ${WORKER_HOSTS[@]}; do
 	WORKER=$(cat $k | gzip | base64 -w0)
 	ETCDWORKERKEY=$(cat $l | gzip | base64 -w0)
 	ETCDWORKER=$(cat $m | gzip | base64 -w0)
+	ETCDWORKERKEYBASE64=$(cat $l | base64 -w0)
+	ETCDWORKERBASE64=$(cat $m | base64 -w0)
 	echo WORKERKEY_$i:$WORKERKEY >> index.txt
 	echo WORKER_$i:$WORKER >> index.txt
 	echo ETCDWORKERKEY_$i:$ETCDWORKERKEY >> index.txt
 	echo ETCDWORKER_$i:$ETCDWORKER >> index.txt
+	echo ETCDWORKERKEYBASE64_$i:$ETCDWORKERKEYBASE64 >> index.txt
+	echo ETCDWORKERBASE64_$i:$ETCDWORKERBASE64 >> index.txt
 done
 
 ADMINKEY=`cat admin-key.pem | gzip | base64 -w0`
@@ -121,6 +139,7 @@ echo CAKEY:$CAKEY >> index.txt
 echo CACERT:$CACERT >> index.txt
 echo ETCDCAKEY:$ETCDCAKEY >> index.txt
 echo ETCDCACERT:$ETCDCACERT >> index.txt
+echo ETCDCACERTBASE64:$ETCDCACERTBASE64 >> index.txt
 echo APISERVERKEY:$APISERVERKEY >> index.txt
 echo APISERVER:$APISERVER >> index.txt
 echo ADMINKEY:$ADMINKEY >> index.txt
@@ -129,6 +148,16 @@ echo CLOUDCONF:$CLOUDCONF >> index.txt
 
 #convert ssh public key to base64 gzip.
 UCK1=`echo $USER_CORE_KEY1 | gzip | base64 -w0`
+
+if [ $NET_OVERLAY == "calico" ]; then
+	NETOVERLAY_MOUNTS="--volume cni-net,kind=host,source=/etc/cni/net.d \\\\\n        --mount volume=cni-net,target=/etc/cni/net.d \\\\\n        --volume cni-bin,kind=host,source=/opt/cni/bin \\\\\n        --mount volume=cni-bin,target=/opt/cni/bin \\\\"
+	NETOVERLAY_DIRS="ExecStartPre=/usr/bin/mkdir -p /opt/cni/bin\n        ExecStartPre=/usr/bin/mkdir -p /etc/cni/net.d"
+	NETOVERLAY_CNICONF="--cni-conf-dir=/etc/cni/net.d \\\\\n        --cni-bin-dir=/opt/cni/bin \\\\"
+else
+	NETOVERLAY_CNICONF="--cni-conf-dir=/etc/kubernetes/cni/net.d \\\\"
+	NETOVERLAY_MOUNTS="\\\\"
+	NETOVERLAY_DIRS="\\\\"
+fi
 
 #generate the master.yaml from the controller.yaml template
 sed -e "s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g" \
@@ -147,14 +176,19 @@ sed -e "s,MASTER_HOST_FQDN,$MASTER_HOST_FQDN,g" \
 -e "s,\<CACERT\>,$CACERT,g" \
 -e "s,\<APISERVERKEY\>,$APISERVERKEY,g" \
 -e "s,\<APISERVER\>,$APISERVER,g" \
--e "s,ETCDCACERT,$ETCDCACERT,g" \
--e "s,ETCDAPISERVERKEY,$ETCDAPISERVERKEY,g" \
--e "s,ETCDAPISERVER,$ETCDAPISERVER,g" \
+-e "s,\<ETCDCACERT\>,$ETCDCACERT,g" \
+-e "s,\<ETCDAPISERVERKEY\>,$ETCDAPISERVERKEY,g" \
+-e "s,\<ETCDAPISERVER\>,$ETCDAPISERVER,g" \
 -e "s,CLOUDCONF,$CLOUDCONF,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
+-e "s@AUTHORIZATION_MODE@${AUTHORIZATION_MODE}@g" \
+-e "s@NETOVERLAY_MOUNTS@${NETOVERLAY_MOUNTS}@g" \
+-e "s@NETOVERLAY_DIRS@${NETOVERLAY_DIRS}@g" \
+-e "s@NETOVERLAY_CNICONF@${NETOVERLAY_CNICONF}@g" \
 ../template/controller.yaml > node_$MASTER_HOST_IP.yaml
 echo ----------------------
 echo Generated: Master: node_$MASTER_HOST_IP.yaml
+
 
 #genereate the worker yamls from the worker.yaml template
 for i in ${WORKER_HOSTS[@]}; do
@@ -173,15 +207,27 @@ sed -e "s,WORKER_IP,$i,g" \
 -e "s,\<CACERT\>,$CACERT,g" \
 -e "s,\<WORKERKEY\>,`cat index.txt|grep -w WORKERKEY_$i|cut -d: -f2`,g" \
 -e "s,\<WORKER\>,`cat index.txt|grep -w WORKER_$i|cut -d: -f2`,g" \
--e "s,ETCDCACERT,$ETCDCACERT,g" \
--e "s,ETCDWORKERKEY,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
--e "s,ETCDWORKER,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDCACERT\>,$ETCDCACERT,g" \
+-e "s,\<ETCDWORKERKEY\>,`cat index.txt|grep -w ETCDWORKERKEY_$i|cut -d: -f2`,g" \
+-e "s,\<ETCDWORKER\>,`cat index.txt|grep -w ETCDWORKER_$i|cut -d: -f2`,g" \
 -e "s,CLOUDCONF,$CLOUDCONF,g" \
 -e "s,FLANNEL_VER,$FLANNEL_VER,g" \
+-e "s@NETOVERLAY_MOUNTS@${NETOVERLAY_MOUNTS}@g" \
+-e "s@NETOVERLAY_DIRS@${NETOVERLAY_DIRS}@g" \
+-e "s@NETOVERLAY_CNICONF@${NETOVERLAY_CNICONF}@g" \
 ../template/worker.yaml > node_$i.yaml
 echo Generated: Worker: node_$i.yaml
 done
-echo -----------------------------------
+echo ---------------------
+
+sed -e "s,\<ETCDCACERTBASE64\>,$ETCDCACERTBASE64,g" \
+-e "s,\<ETCDAPISERVERKEYBASE64\>,$ETCDAPISERVERKEYBASE64,g" \
+-e "s,\<ETCDAPISERVERBASE64\>,$ETCDAPISERVERBASE64,g" \
+-e "s@ETCD_ENDPOINTS_URLS@${ETCD_ENDPOINTS_URLS}@g" \
+../template/calico.tmpl.yaml > calico.yaml
+echo Generated: Calico.yaml
+echo ---------------------
+cp ../template/calico_ctl_tmpl.yaml calico_ctl.yaml
 cd -
 
 echo You can run the following to interact with your new cluster:

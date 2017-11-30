@@ -16,7 +16,7 @@ spec:
         tier: dataprocessing 
     spec:
       containers:
-      - image: pblaas/spark:2.1.1
+      - image: pblaas/spark:2.2.0
         command: [ "/usr/bin/supervisord" ]
         args: [ "--configuration=/opt/conf/slave.conf" ]
         resources:

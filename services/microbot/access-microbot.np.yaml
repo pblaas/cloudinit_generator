@@ -1,0 +1,14 @@
+kind: NetworkPolicy
+apiVersion: extensions/v1beta1
+metadata:
+  name: access-microbot
+  namespace: microbot
+spec:
+  podSelector:
+    matchLabels:
+      app: microbot
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            run: access
