@@ -43,7 +43,7 @@ spec:
               key: jenkins-admin-user
               name: jenkins
         name: master
-        image: jenkins/jenkins:2.73.3
+        image: jenkins/jenkins:2.89.2
         ports:
         - containerPort: 8080
         - containerPort: 50000
@@ -77,7 +77,7 @@ spec:
       - command:
         - sh
         - /var/jenkins_config/apply_config.sh
-        image: jenkins/jenkins:2.73.3
+        image: jenkins/jenkins:2.89.2
         imagePullPolicy: Always
         name: copy-default-config
         resources: {}
