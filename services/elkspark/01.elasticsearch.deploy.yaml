@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: elasticsearch-lib-claim
+  namespace: elkspark
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "gold"
+  labels:
+    app: elasticsearch
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 60Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: elasticsearch-log-claim
+  namespace: elkspark
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "gold"
+  labels:
+    app: elasticsearch
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: elkspark
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      securityContext:
+        fsGroup: 1000            
+      containers:
+      - name: elasticsearch 
+        image: pblaas/elasticsearch:6.1.2
+        ports:
+        - containerPort: 9200
+        - containerPort: 9300
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 9200
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 2
+          failureThreshold: 5
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 2500Mi
+          requests:
+            cpu: 500m
+            memory: 1500Mi
+        volumeMounts:
+        - mountPath: /var/lib/elasticsearch/
+          name: elasticsearch-lib
+        - mountPath: /var/log/elasticsearch
+          name: elasticsearch-log
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        runAsUser: 0
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: elasticsearch-lib
+        persistentVolumeClaim:
+          claimName: elasticsearch-lib-claim
+      - name: elasticsearch-log
+        persistentVolumeClaim:
+          claimName: elasticsearch-log-claim
+
+

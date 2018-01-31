@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: elkspark
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: pblaas/kibana:6.1.2
+        ports:
+        - containerPort: 5601
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5601
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 2
+          failureThreshold: 5
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 2500Mi
+          requests:
+            cpu: 500m
+            memory: 1500Mi
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        runAsUser: 0
+      terminationGracePeriodSeconds: 30
+
+

@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: elasticsearch
+ namespace: elkspark
+spec:
+ rules:
+   - host: elasticsearch.k8s.proserve.nl
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: elasticsearch
+             servicePort: 9200
