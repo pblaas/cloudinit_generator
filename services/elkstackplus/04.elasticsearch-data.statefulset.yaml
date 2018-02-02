@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-data
+  labels:
+    app: elasticsearch-data
+spec:
+  ports:
+  - 
+    port: 9200
+    name: rest
+  - 
+    port: 9300
+    name: transport
+  clusterIP: None
+  selector:
+    app: elasticsearch-data
+---
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: elasticsearch-data
+spec:
+  selector:
+    matchLabels:
+      app: elasticsearch-data # has to match .spec.template.metadata.labels
+  serviceName: "elasticsearch-data"
+  replicas: 2 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: elasticsearch-data # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: elasticsearch-data
+        image: pblaas/elasticsearch:6.1.2
+        args: [ "-E", "cluster.name=$(cluster.name)", "-E", "node.data=true", "-E", "node.master=false", "-E", "node.name=$(MY_POD_NAME)", "-E", "discovery.zen.ping.unicast.hosts=elasticsearch-master" ]
+        imagePullPolicy: Always
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        envFrom:
+        - configMapRef:
+            name: escluster-config
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9200
+          name: rest
+        - containerPort: 9300
+          name: transport
+        volumeMounts:
+        - name: es-lib
+          mountPath: /var/lib/elasticsearch
+        - name: es-log
+          mountPath: /var/log/elasticsearch
+  volumeClaimTemplates:
+  - metadata:
+      name: es-lib
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: gold
+      resources:
+        requests:
+          storage: 10Gi
+  - metadata:
+      name: es-log
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: gold
+      resources:
+        requests:
+          storage: 2Gi
