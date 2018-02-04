@@ -51,7 +51,7 @@ spec:
         tier: dataprocessing 
     spec:
       containers:
-      - image: pblaas/zeppelin:0.7.3_2.2.0
+      - image: pblaas/zeppelin:0.7.3_2.2.1
         resources:
           requests:
             cpu: "2000m"
