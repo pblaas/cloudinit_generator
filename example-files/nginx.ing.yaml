@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+ name: nginx
+spec:
+ rules:
+   - host: nginx.83.96.238.194.nip.io
+     http:
+       paths:
+         - path: /
+           backend:
+             serviceName: nginxj
+             servicePort: 80
