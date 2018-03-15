@@ -1,0 +1,34 @@
+kind: DaemonSet
+apiVersion: extensions/v1beta1
+metadata:
+  name: vmwaretools
+  namespace: kube-system
+  labels:
+    k8s-app: vmwaretools 
+    kubernetes.io/cluster-service: "true"
+spec:
+  selector:
+    matchLabels:
+      k8s-app: vmwaretools
+  template:
+    metadata:
+      labels:
+        k8s-app: vmwaretools
+        name: vmwaretools
+    spec:
+      #
+      hostNetwork: true
+      #
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: run-systemd
+          hostPath:
+            path: /run/systemd 
+      containers:
+      - image: godmodelabs/open-vm-tools
+        name: open-vm-tools
+        imagePullPolicy: Always
+        volumeMounts:
+          - mountPath: "/run/systemd"
+            name: "run-systemd"
+
