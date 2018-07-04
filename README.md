@@ -1,6 +1,6 @@
-:exclamation: The scripts used in this project are outdated and might not work with the latest versions of CoreOS due to the fact the scripts are based on etcd2 which is no longer supported by later version of CoreOS. 
+:exclamation: The scripts used in this project are outdated and will not work with the latest versions of CoreOS due to the fact the scripts are based on etcd2 which is no longer supported by later version of CoreOS. Besides the etcd version the scripts utilize the cloud init method for loading the config. I fixed both issues in other project https://github.com/pblaas/nagoya however primary use for this project is an OpenStack environment. 
 
-This project will still receive some updates in the services section; however this will eventually be ported to the https://github.com/pblaas/k8services project.
+This project will still receive some updates in the services section; however this will eventually be moved to the https://github.com/pblaas/k8services project.
 
 ## Cloudinit generator
 This script and templates can be used to simplify deployment of a CoreOS Container Linux Kubernetes cluster. It contains 3 steps.
